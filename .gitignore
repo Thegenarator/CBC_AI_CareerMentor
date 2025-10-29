@@ -219,3 +219,11 @@ user_data.json
 payment_logs.txt
 mpesa_logs.txt
 api_usage.txt
+
+# ===========================================
+# Documentation Files (contain sensitive info)
+# ===========================================
+SETUP_GUIDE.md
+MPESA_CONFIGURATION.md
+PREMIUM_FEATURES_COMPLETE.md
+PREMIUM_FEATURES_FIX.md
