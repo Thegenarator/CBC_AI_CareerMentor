@@ -1,0 +1,29 @@
+body {
+    font-family: 'Segoe UI', sans-serif;
+}
+
+
+#pathway-result {
+  padding: 1rem;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  line-height: 1.6;
+  white-space: normal;
+}
+
+
+#chat-box span {
+  line-height: 1.6;
+  max-width: 100%;
+  white-space: normal;
+  word-wrap: break-word;
+}
+
+strong {
+  font-weight: bold;
+}
+
+.text-left,
+.text-right {
+  margin-bottom: 12px;
+}

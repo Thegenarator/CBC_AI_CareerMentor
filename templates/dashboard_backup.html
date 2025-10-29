@@ -1,0 +1,965 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <title>Dashboard - CareerMentor Kenya</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+  
+  <!-- Font Awesome -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+  
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+
+  <!-- Meta Tags -->
+  <meta name="description" content="Career guidance and AI mentorship platform for Kenyan CBC students.">
+  <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}">
+  <meta name="theme-color" content="#4f46e5" />
+
+  <style>
+    .gradient-bg {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+    .card-hover {
+      transition: all 0.3s ease;
+    }
+    .card-hover:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+    }
+    .glass-effect {
+      backdrop-filter: blur(10px);
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    .spinner {
+      border: 4px solid rgba(0, 0, 0, 0.1);
+      border-top-color: #4f46e5;
+      border-radius: 50%;
+      width: 20px;
+      height: 20px;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+    .fade-in {
+      animation: fadeIn 0.8s ease-in;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .slide-in-left {
+      animation: slideInLeft 0.8s ease-out;
+    }
+    @keyframes slideInLeft {
+      from { opacity: 0; transform: translateX(-50px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+    .slide-in-right {
+      animation: slideInRight 0.8s ease-out;
+    }
+    @keyframes slideInRight {
+      from { opacity: 0; transform: translateX(50px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+    .pulse-animation {
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+    }
+    .chat-message {
+      animation: slideInMessage 0.3s ease-out;
+    }
+    @keyframes slideInMessage {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .feature-card {
+      background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05));
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255,255,255,0.2);
+    }
+  </style>
+</head>
+<body class="gradient-bg min-h-screen">
+
+  <!-- Header -->
+  <header class="bg-white/10 backdrop-blur-md border-b border-white/20 p-4">
+    <div class="max-w-7xl mx-auto flex justify-between items-center">
+      <div class="flex items-center space-x-3">
+        <div class="w-10 h-10 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
+          <i class="fas fa-graduation-cap text-white text-lg"></i>
+        </div>
+        <h1 class="text-2xl font-bold text-white">CareerMentor Kenya</h1>
+      </div>
+      <div class="flex items-center space-x-4">
+        <div class="text-white/80 text-sm">
+          <i class="fas fa-user-circle mr-2"></i>
+          <span id="user-name">Loading...</span>
+        </div>
+        <button onclick="logout()" class="bg-red-500/20 hover:bg-red-500/30 text-red-200 px-4 py-2 rounded-lg transition duration-200 border border-red-500/30 flex items-center space-x-2">
+          <i class="fas fa-sign-out-alt"></i>
+          <span>Logout</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-7xl mx-auto p-6 space-y-8">
+    
+    <!-- Welcome Section -->
+    <section class="text-center fade-in">
+      <h2 class="text-4xl font-bold text-white mb-4">Welcome to Your Dashboard</h2>
+      <p class="text-xl text-white/80 max-w-3xl mx-auto">
+        Discover your potential with AI-powered career guidance, personalized CBC pathway recommendations, 
+        and professional CV generation.
+      </p>
+    </section>
+
+    <!-- Quick Stats -->
+    <section class="grid grid-cols-1 md:grid-cols-3 gap-6 fade-in">
+      <div class="feature-card rounded-xl p-6 card-hover">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-white/70 text-sm font-medium">AI Conversations</p>
+            <p id="chat-count" class="text-3xl font-bold text-white mt-2">0</p>
+          </div>
+          <div class="text-4xl opacity-50">
+            <i class="fas fa-comments text-white"></i>
+          </div>
+        </div>
+      </div>
+      
+      <div class="feature-card rounded-xl p-6 card-hover">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-white/70 text-sm font-medium">CVs Generated</p>
+            <p id="cv-count" class="text-3xl font-bold text-white mt-2">0</p>
+          </div>
+          <div class="text-4xl opacity-50">
+            <i class="fas fa-file-alt text-white"></i>
+          </div>
+        </div>
+      </div>
+      
+      <div class="feature-card rounded-xl p-6 card-hover">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-white/70 text-sm font-medium">Pathways Explored</p>
+            <p id="pathway-count" class="text-3xl font-bold text-white mt-2">0</p>
+          </div>
+          <div class="text-4xl opacity-50">
+            <i class="fas fa-route text-white"></i>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Main Content Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      
+      <!-- AI Mentor Chat -->
+      <div class="lg:col-span-2">
+        <div class="feature-card rounded-xl p-6 card-hover slide-in-left">
+          <div class="flex items-center space-x-3 mb-6">
+            <div class="w-12 h-12 bg-blue-500 rounded-xl flex items-center justify-center">
+              <i class="fas fa-robot text-white text-xl"></i>
+            </div>
+            <h2 class="text-2xl font-semibold text-white">AI Career Mentor</h2>
+          </div>
+          
+          <div id="chat-box" class="border border-white/20 rounded-lg p-4 bg-white/5 text-sm space-y-3 h-[400px] overflow-y-auto mb-4">
+            <div class="text-center text-white/60 py-8">
+              <i class="fas fa-robot text-4xl mb-4"></i>
+              <p>Hi! I'm your AI Career Mentor. Ask me anything about CBC, career paths, or education!</p>
+            </div>
+          </div>
+          
+          <div class="flex space-x-2">
+            <input id="user-input" type="text" placeholder="Ask a question about CBC or careers..." 
+              class="flex-grow p-3 border border-white/20 rounded-lg bg-white/10 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
+              disabled />
+            <button id="send-btn" onclick="sendMessage()" 
+              class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg transition duration-200 disabled:opacity-50 flex items-center space-x-2" 
+              disabled>
+              <i class="fas fa-paper-plane"></i>
+              <span>Send</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- CBC Information -->
+      <div class="lg:col-span-1">
+        <div class="feature-card rounded-xl p-6 card-hover slide-in-right">
+          <div class="flex items-center space-x-3 mb-4">
+            <div class="w-10 h-10 bg-green-500 rounded-lg flex items-center justify-center">
+              <i class="fas fa-book text-white"></i>
+            </div>
+            <h3 class="text-xl font-semibold text-white">About CBC</h3>
+          </div>
+          <div class="text-white/80 text-sm whitespace-pre-wrap overflow-y-auto max-h-[400px]" id="cbc-section">
+            <!-- Injected from Flask -->
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CV Generator Section -->
+    <section class="feature-card rounded-xl p-8 card-hover fade-in">
+      <div class="text-center mb-8">
+        <div class="flex items-center justify-center space-x-3 mb-4">
+          <div class="w-12 h-12 bg-green-500 rounded-xl flex items-center justify-center">
+            <i class="fas fa-file-alt text-white text-xl"></i>
+          </div>
+          <h2 class="text-3xl font-semibold text-white">AI CV Generator</h2>
+        </div>
+        <p class="text-white/80 text-lg">Create a professional CV tailored to your skills and career aspirations</p>
+      </div>
+      
+      <div class="max-w-4xl mx-auto">
+        <form id="cv-structured-form" class="space-y-6">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <input id="cv-name" type="text" placeholder="Full Name" 
+              class="w-full p-4 border border-white/20 rounded-lg bg-white/10 text-white placeholder-white/50 focus:ring-2 focus:ring-green-400 focus:outline-none" 
+              required />
+            <input id="cv-email" type="email" placeholder="Email" 
+              class="w-full p-4 border border-white/20 rounded-lg bg-white/10 text-white placeholder-white/50 focus:ring-2 focus:ring-green-400 focus:outline-none" 
+              required />
+          </div>
+          
+          <input id="cv-education" type="text" placeholder="Education Background (e.g., Form 4 graduate, KCSE)" 
+            class="w-full p-4 border border-white/20 rounded-lg bg-white/10 text-white placeholder-white/50 focus:ring-2 focus:ring-green-400 focus:outline-none" />
+          
+          <textarea id="cv-skills" placeholder="Key Skills (e.g., Communication, Computer skills, Leadership)" 
+            rows="3" class="w-full p-4 border border-white/20 rounded-lg bg-white/10 text-white placeholder-white/50 focus:ring-2 focus:ring-green-400 focus:outline-none resize-none"></textarea>
+          
+          <textarea id="cv-interests" placeholder="Career Interests & Goals (e.g., I want to work in healthcare, I'm interested in technology)" 
+            rows="3" class="w-full p-4 border border-white/20 rounded-lg bg-white/10 text-white placeholder-white/50 focus:ring-2 focus:ring-green-400 focus:outline-none resize-none"></textarea>
+          
+          <div class="text-center">
+            <button type="button" onclick="generateStructuredCV()" 
+              class="bg-green-600 hover:bg-green-700 text-white px-8 py-4 rounded-lg transition duration-200 flex items-center justify-center space-x-3 mx-auto pulse-animation">
+              <i class="fas fa-magic"></i>
+              <span>Generate AI CV</span>
+              <span id="cv-spinner" class="spinner hidden"></span>
+            </button>
+            <p id="structured-cv-status" class="text-white/80 mt-4 min-h-[24px]"></p>
+          </div>
+        </form>
+      </div>
+    </section>
+
+    <!-- CBC Career Pathway Section -->
+    <section class="feature-card rounded-xl p-8 card-hover fade-in">
+      <div class="text-center mb-8">
+        <div class="flex items-center justify-center space-x-3 mb-4">
+          <div class="w-12 h-12 bg-purple-500 rounded-xl flex items-center justify-center">
+            <i class="fas fa-route text-white text-xl"></i>
+          </div>
+          <h2 class="text-3xl font-semibold text-white">CBC Career Pathway Explorer</h2>
+        </div>
+        <p class="text-white/80 text-lg">Discover your perfect CBC Senior School pathway based on your unique strengths and interests</p>
+      </div>
+      
+      <div class="max-w-4xl mx-auto">
+        <div class="mb-6">
+          <textarea id="pathway-prompt" 
+            placeholder="Describe yourself, your interests, and strengths. For example: 'I love solving puzzles, playing music, working with friends, and I'm good at math and science. I enjoy helping others and want to make a difference in people's lives.'" 
+            rows="4" class="w-full p-4 border border-white/20 rounded-lg bg-white/10 text-white placeholder-white/50 focus:ring-2 focus:ring-purple-400 focus:outline-none resize-none"></textarea>
+        </div>
+        
+        <div class="text-center">
+          <button id="generate-pathway-btn" onclick="generatePathway()" 
+            class="bg-purple-600 hover:bg-purple-700 text-white px-8 py-4 rounded-lg transition duration-200 flex items-center justify-center space-x-3 mx-auto">
+            <i class="fas fa-compass"></i>
+            <span>Discover My Pathway</span>
+            <span id="spinner" class="spinner hidden"></span>
+          </button>
+          <p id="pathway-status" class="text-white/80 mt-4 min-h-[24px]"></p>
+        </div>
+        
+        <div id="pathway-result" class="mt-8 bg-white/10 rounded-lg p-6 text-white/90 leading-relaxed hidden"></div>
+        
+        <div class="text-center mt-6">
+          <button id="download-pathway-btn" class="hidden bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-lg transition duration-200 flex items-center space-x-2 mx-auto" onclick="downloadPathwayPDF()">
+            <i class="fas fa-download"></i>
+            <span>Download Pathway Report</span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Premium AI Features Section -->
+    <section class="feature-card rounded-xl p-8 card-hover fade-in">
+      <div class="text-center mb-8">
+        <div class="flex items-center justify-center space-x-3 mb-4">
+          <div class="w-12 h-12 bg-gradient-to-r from-yellow-500 to-orange-500 rounded-xl flex items-center justify-center">
+            <i class="fas fa-crown text-white text-xl"></i>
+          </div>
+          <h2 class="text-3xl font-semibold text-white">Premium AI Career Tools</h2>
+        </div>
+        <p class="text-white/80 text-lg">Advanced AI-powered career development tools for comprehensive career planning</p>
+      </div>
+      
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <!-- AI Career Assessment -->
+        <div class="bg-white/5 rounded-lg p-6 border border-white/10">
+          <div class="text-center mb-4">
+            <div class="w-16 h-16 bg-blue-500 rounded-full flex items-center justify-center mx-auto mb-3">
+              <i class="fas fa-brain text-white text-2xl"></i>
+            </div>
+            <h3 class="text-xl font-semibold text-white mb-2">AI Career Assessment</h3>
+            <p class="text-white/70 text-sm">Comprehensive personality and career assessment</p>
+          </div>
+          <button onclick="openAssessmentModal()" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg transition duration-200">
+            Start Assessment
+          </button>
+        </div>
+
+        <!-- AI Interview Prep -->
+        <div class="bg-white/5 rounded-lg p-6 border border-white/10">
+          <div class="text-center mb-4">
+            <div class="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-3">
+              <i class="fas fa-handshake text-white text-2xl"></i>
+            </div>
+            <h3 class="text-xl font-semibold text-white mb-2">AI Interview Prep</h3>
+            <p class="text-white/70 text-sm">Personalized interview preparation and coaching</p>
+          </div>
+          <button onclick="openInterviewModal()" class="w-full bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded-lg transition duration-200">
+            Prepare for Interview
+          </button>
+        </div>
+
+        <!-- AI Skill Analyzer -->
+        <div class="bg-white/5 rounded-lg p-6 border border-white/10">
+          <div class="text-center mb-4">
+            <div class="w-16 h-16 bg-purple-500 rounded-full flex items-center justify-center mx-auto mb-3">
+              <i class="fas fa-chart-line text-white text-2xl"></i>
+            </div>
+            <h3 class="text-xl font-semibold text-white mb-2">AI Skill Analyzer</h3>
+            <p class="text-white/70 text-sm">Analyze skills gaps and development roadmap</p>
+          </div>
+          <button onclick="openSkillModal()" class="w-full bg-purple-600 hover:bg-purple-700 text-white py-2 px-4 rounded-lg transition duration-200">
+            Analyze Skills
+          </button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Premium Feature Modals -->
+  
+  <!-- AI Career Assessment Modal -->
+  <div id="assessment-modal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center z-50 p-4">
+    <div class="bg-white rounded-2xl p-8 w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+      <div class="flex justify-between items-center mb-6">
+        <h2 class="text-2xl font-bold text-gray-800">AI Career Assessment</h2>
+        <button onclick="closeAssessmentModal()" class="text-gray-500 hover:text-gray-700 text-2xl">&times;</button>
+      </div>
+      
+      <div id="assessment-questions" class="space-y-6">
+        <!-- Questions will be dynamically loaded -->
+      </div>
+      
+      <div class="mt-8 text-center">
+        <button id="submit-assessment" onclick="submitAssessment()" class="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-lg transition duration-200">
+          Get My Assessment
+        </button>
+      </div>
+      
+      <div id="assessment-result" class="mt-8 hidden">
+        <h3 class="text-xl font-semibold text-gray-800 mb-4">Your Career Assessment</h3>
+        <div id="assessment-content" class="bg-gray-50 p-6 rounded-lg text-gray-700 whitespace-pre-wrap"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- AI Interview Prep Modal -->
+  <div id="interview-modal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center z-50 p-4">
+    <div class="bg-white rounded-2xl p-8 w-full max-w-2xl">
+      <div class="flex justify-between items-center mb-6">
+        <h2 class="text-2xl font-bold text-gray-800">AI Interview Preparation</h2>
+        <button onclick="closeInterviewModal()" class="text-gray-500 hover:text-gray-700 text-2xl">&times;</button>
+      </div>
+      
+      <form id="interview-form" class="space-y-6">
+        <div>
+          <label class="block text-gray-700 font-medium mb-2">Job Title</label>
+          <input type="text" id="job-title" placeholder="e.g., Software Developer, Marketing Manager" 
+            class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent" required>
+        </div>
+        
+        <div>
+          <label class="block text-gray-700 font-medium mb-2">Industry</label>
+          <select id="industry" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent">
+            <option value="">Select Industry</option>
+            <option value="Technology">Technology</option>
+            <option value="Healthcare">Healthcare</option>
+            <option value="Finance">Finance</option>
+            <option value="Education">Education</option>
+            <option value="Marketing">Marketing</option>
+            <option value="Engineering">Engineering</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+        
+        <div>
+          <label class="block text-gray-700 font-medium mb-2">Experience Level</label>
+          <select id="experience-level" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent">
+            <option value="entry">Entry Level (0-2 years)</option>
+            <option value="mid">Mid Level (3-5 years)</option>
+            <option value="senior">Senior Level (6+ years)</option>
+          </select>
+        </div>
+        
+        <div class="text-center">
+          <button type="button" onclick="generateInterviewPrep()" class="bg-green-600 hover:bg-green-700 text-white px-8 py-3 rounded-lg transition duration-200">
+            Generate Interview Prep
+          </button>
+        </div>
+      </form>
+      
+      <div id="interview-result" class="mt-8 hidden">
+        <h3 class="text-xl font-semibold text-gray-800 mb-4">Your Interview Preparation Guide</h3>
+        <div id="interview-content" class="bg-gray-50 p-6 rounded-lg text-gray-700 whitespace-pre-wrap"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- AI Skill Analyzer Modal -->
+  <div id="skill-modal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center z-50 p-4">
+    <div class="bg-white rounded-2xl p-8 w-full max-w-2xl">
+      <div class="flex justify-between items-center mb-6">
+        <h2 class="text-2xl font-bold text-gray-800">AI Skill Analyzer</h2>
+        <button onclick="closeSkillModal()" class="text-gray-500 hover:text-gray-700 text-2xl">&times;</button>
+      </div>
+      
+      <form id="skill-form" class="space-y-6">
+        <div>
+          <label class="block text-gray-700 font-medium mb-2">Current Skills</label>
+          <textarea id="current-skills" rows="4" placeholder="Describe your current skills, experiences, and competencies..." 
+            class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none" required></textarea>
+        </div>
+        
+        <div>
+          <label class="block text-gray-700 font-medium mb-2">Career Goal</label>
+          <input type="text" id="career-goal" placeholder="e.g., Become a Data Scientist, Start my own business" 
+            class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent" required>
+        </div>
+        
+        <div class="text-center">
+          <button type="button" onclick="generateSkillAnalysis()" class="bg-purple-600 hover:bg-purple-700 text-white px-8 py-3 rounded-lg transition duration-200">
+            Analyze My Skills
+          </button>
+        </div>
+      </form>
+      
+      <div id="skill-result" class="mt-8 hidden">
+        <h3 class="text-xl font-semibold text-gray-800 mb-4">Your Skill Analysis Report</h3>
+        <div id="skill-content" class="bg-gray-50 p-6 rounded-lg text-gray-700 whitespace-pre-wrap"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyDTm-ckLXcOcRM_4g5hTs94Tm4W_BUx-eI",
+      authDomain: "cbch-6178c.firebaseapp.com",
+      projectId: "cbch-6178c",
+      appId: "1:577618974847:web:730ae29830d14fc0a6c74a"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+    const CBC_EXPLAINER = `{{ cbc_explainer }}`;
+
+    // User stats
+    let userStats = {
+      chatCount: 0,
+      cvCount: 0,
+      pathwayCount: 0
+    };
+
+    auth.onAuthStateChanged(user => {
+      if (!user) return window.location.href = "/";
+      
+      // Update user name
+      document.getElementById("user-name").textContent = user.displayName || user.email;
+      
+      // Pre-fill CV form
+      document.getElementById("cv-name").value = user.displayName || "";
+      document.getElementById("cv-email").value = user.email || "";
+      
+      // Load CBC content
+      document.getElementById("cbc-section").textContent = CBC_EXPLAINER.slice(0, 1200) + "...";
+      
+      // Enable chat
+      document.getElementById("user-input").disabled = false;
+      document.getElementById("send-btn").disabled = false;
+      
+      // Load user stats
+      loadUserStats(user.uid);
+    });
+
+    function logout() {
+      auth.signOut().then(() => window.location.href = "/");
+    }
+
+    async function loadUserStats(userId) {
+      try {
+        // Load user's activity from Firebase
+        const userDoc = await db.collection("users").doc(userId).get();
+        if (userDoc.exists) {
+          const userData = userDoc.data();
+          userStats = {
+            chatCount: userData.chatCount || 0,
+            cvCount: userData.cvCount || 0,
+            pathwayCount: userData.pathwayCount || 0
+          };
+          updateStatsDisplay();
+        }
+      } catch (error) {
+        console.error("Error loading user stats:", error);
+      }
+    }
+
+    function updateStatsDisplay() {
+      document.getElementById("chat-count").textContent = userStats.chatCount;
+      document.getElementById("cv-count").textContent = userStats.cvCount;
+      document.getElementById("pathway-count").textContent = userStats.pathwayCount;
+    }
+
+    async function updateUserStats(userId, statType) {
+      try {
+        await db.collection("users").doc(userId).update({
+          [`${statType}Count`]: firebase.firestore.FieldValue.increment(1)
+        });
+        userStats[`${statType}Count`]++;
+        updateStatsDisplay();
+      } catch (error) {
+        console.error("Error updating user stats:", error);
+      }
+    }
+
+    async function sendMessage() {
+      const input = document.getElementById("user-input");
+      const chatBox = document.getElementById("chat-box");
+      const userText = input.value.trim();
+      if (!userText) return;
+
+      // Clear welcome message
+      if (chatBox.children.length === 1) {
+        chatBox.innerHTML = "";
+      }
+
+      // Add user message
+      chatBox.innerHTML += `
+        <div class="text-right chat-message">
+          <span class="bg-blue-600 text-white px-4 py-3 rounded-lg inline-block max-w-[80%]">
+            ${userText}
+          </span>
+        </div>
+      `;
+      input.value = "";
+      chatBox.scrollTop = chatBox.scrollHeight;
+
+      const user = firebase.auth().currentUser;
+
+      try {
+        const res = await fetch('/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            message: userText,
+            email: user?.email || "guest@cbc.com"
+          })
+        });
+
+        const data = await res.json();
+        const formattedReply = data.reply
+          ? formatAIResponse(data.reply)
+          : "⚠️ Sorry, no response received.";
+
+        chatBox.innerHTML += `
+          <div class="text-left mt-2 chat-message">
+            <span class="bg-white/20 text-white px-4 py-3 rounded-lg inline-block max-w-[80%]">
+              ${formattedReply}
+            </span>
+          </div>
+        `;
+        chatBox.scrollTop = chatBox.scrollHeight;
+
+        // Update chat count
+        await updateUserStats(user.uid, 'chat');
+
+      } catch (error) {
+        console.error("Chat error:", error);
+        chatBox.innerHTML += `
+          <div class="text-left mt-2 text-red-300 chat-message">
+            ❌ Error: Could not get a response from the AI mentor.
+          </div>
+        `;
+        chatBox.scrollTop = chatBox.scrollHeight;
+      }
+    }
+
+    function formatAIResponse(text) {
+      return text.replace(/\n/g, "<br>");
+    }
+
+    // Allow Enter key to send message
+    document.getElementById("user-input").addEventListener("keypress", function(e) {
+      if (e.key === "Enter") {
+        sendMessage();
+      }
+    });
+
+    async function generateStructuredCV() {
+      const name = document.getElementById("cv-name").value.trim();
+      const email = document.getElementById("cv-email").value.trim();
+      const education = document.getElementById("cv-education").value.trim();
+      const skills = document.getElementById("cv-skills").value.trim();
+      const interests = document.getElementById("cv-interests").value.trim();
+      const status = document.getElementById("structured-cv-status");
+      const spinner = document.getElementById("cv-spinner");
+      const button = event.target;
+
+      if (!name || !email) {
+        alert("Please fill in your Name and Email.");
+        return;
+      }
+
+      status.textContent = "Generating your enhanced CV... please wait ⏳";
+      spinner.classList.remove("hidden");
+      button.disabled = true;
+
+      try {
+        const res = await fetch('/generate_cv', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ 
+            name, 
+            email, 
+            prompt: `Education: ${education}\nSkills: ${skills}\nInterests: ${interests}` 
+          })
+        });
+
+        if (!res.ok) throw new Error("Failed to generate CV");
+
+        const blob = await res.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "CareerMentor_CV.pdf";
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        window.URL.revokeObjectURL(url);
+
+        status.textContent = "✅ CV downloaded successfully!";
+        
+        // Update CV count
+        const user = firebase.auth().currentUser;
+        await updateUserStats(user.uid, 'cv');
+
+      } catch (err) {
+        console.error(err);
+        status.textContent = "❌ Error generating CV. Please try again.";
+      } finally {
+        spinner.classList.add("hidden");
+        button.disabled = false;
+      }
+    }
+
+    async function generatePathway() {
+      const promptInput = document.getElementById("pathway-prompt");
+      const prompt = promptInput.value.trim();
+      const status = document.getElementById("pathway-status");
+      const resultDiv = document.getElementById("pathway-result");
+      const downloadBtn = document.getElementById("download-pathway-btn");
+      const spinner = document.getElementById("spinner");
+
+      if (!prompt) {
+        alert("Please enter a description of your interests or strengths.");
+        return;
+      }
+
+      status.textContent = "Generating your personalized pathway... please wait ⏳";
+      spinner.classList.remove("hidden");
+      downloadBtn.classList.add("hidden");
+      resultDiv.classList.add("hidden");
+
+      try {
+        const user = firebase.auth().currentUser;
+        const res = await fetch('/generate_pathway', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ 
+            prompt, 
+            name: user.displayName || "Student",
+            email: user.email 
+          })
+        });
+
+        if (!res.ok) throw new Error("Failed to generate pathway");
+
+        const data = await res.json();
+        status.textContent = "✅ Your personalized pathway is ready!";
+        resultDiv.innerHTML = formatAIResponse(data.preview);
+        resultDiv.classList.remove("hidden");
+        downloadBtn.classList.remove("hidden");
+
+        // Store the prompt for later download
+        downloadBtn.dataset.prompt = prompt;
+
+        // Update pathway count
+        await updateUserStats(user.uid, 'pathway');
+
+      } catch (err) {
+        console.error(err);
+        status.textContent = "❌ Error generating pathway.";
+      } finally {
+        spinner.classList.add("hidden");
+      }
+    }
+
+    async function downloadPathwayPDF() {
+      const prompt = document.getElementById("download-pathway-btn").dataset.prompt;
+      const user = firebase.auth().currentUser;
+
+      const res = await fetch('/download_pathway_pdf', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          prompt, 
+          name: user.displayName || "Student",
+          email: user.email 
+        })
+      });
+
+      if (!res.ok) {
+        alert("Failed to download PDF.");
+        return;
+      }
+
+      const blob = await res.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "CBC_Pathway_Suggestion.pdf";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+    }
+
+    // Premium Feature Functions
+    
+    // Assessment Questions
+    const assessmentQuestions = [
+      "What activities do you enjoy most in your free time?",
+      "How do you prefer to learn new things?",
+      "What type of work environment appeals to you?",
+      "How do you handle challenges and problems?",
+      "What motivates you most in life?",
+      "How do you prefer to work with others?",
+      "What subjects or topics interest you most?",
+      "How do you make important decisions?",
+      "What are your greatest strengths?",
+      "Where do you see yourself in 5 years?"
+    ];
+
+    function openAssessmentModal() {
+      document.getElementById('assessment-modal').classList.remove('hidden');
+      loadAssessmentQuestions();
+    }
+
+    function closeAssessmentModal() {
+      document.getElementById('assessment-modal').classList.add('hidden');
+      document.getElementById('assessment-result').classList.add('hidden');
+    }
+
+    function loadAssessmentQuestions() {
+      const container = document.getElementById('assessment-questions');
+      container.innerHTML = '';
+      
+      assessmentQuestions.forEach((question, index) => {
+        const questionDiv = document.createElement('div');
+        questionDiv.className = 'bg-gray-50 p-4 rounded-lg';
+        questionDiv.innerHTML = `
+          <h4 class="font-semibold text-gray-800 mb-3">Question ${index + 1}: ${question}</h4>
+          <textarea id="answer-${index}" rows="3" placeholder="Your answer..." 
+            class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"></textarea>
+        `;
+        container.appendChild(questionDiv);
+      });
+    }
+
+    async function submitAssessment() {
+      const responses = [];
+      for (let i = 0; i < assessmentQuestions.length; i++) {
+        const answer = document.getElementById(`answer-${i}`).value.trim();
+        if (!answer) {
+          alert('Please answer all questions before submitting.');
+          return;
+        }
+        responses.push(`${assessmentQuestions[i]}: ${answer}`);
+      }
+
+      const user = firebase.auth().currentUser;
+      const button = document.getElementById('submit-assessment');
+      button.disabled = true;
+      button.textContent = 'Analyzing...';
+
+      try {
+        const res = await fetch('/ai_assessment', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            responses: responses,
+            email: user.email
+          })
+        });
+
+        const data = await res.json();
+        if (data.error) throw new Error(data.error);
+
+        document.getElementById('assessment-content').textContent = data.assessment;
+        document.getElementById('assessment-result').classList.remove('hidden');
+        
+        // Update assessment count
+        await updateUserStats(user.uid, 'assessment');
+
+      } catch (error) {
+        console.error(error);
+        alert('Error generating assessment. Please try again.');
+      } finally {
+        button.disabled = false;
+        button.textContent = 'Get My Assessment';
+      }
+    }
+
+    function openInterviewModal() {
+      document.getElementById('interview-modal').classList.remove('hidden');
+      document.getElementById('interview-result').classList.add('hidden');
+    }
+
+    function closeInterviewModal() {
+      document.getElementById('interview-modal').classList.add('hidden');
+    }
+
+    async function generateInterviewPrep() {
+      const jobTitle = document.getElementById('job-title').value.trim();
+      const industry = document.getElementById('industry').value;
+      const experienceLevel = document.getElementById('experience-level').value;
+
+      if (!jobTitle) {
+        alert('Please enter a job title.');
+        return;
+      }
+
+      const user = firebase.auth().currentUser;
+      const button = event.target;
+      button.disabled = true;
+      button.textContent = 'Generating...';
+
+      try {
+        const res = await fetch('/ai_interview_prep', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            job_title: jobTitle,
+            industry: industry,
+            experience_level: experienceLevel,
+            email: user.email
+          })
+        });
+
+        const data = await res.json();
+        if (data.error) throw new Error(data.error);
+
+        document.getElementById('interview-content').textContent = data.interview_prep;
+        document.getElementById('interview-result').classList.remove('hidden');
+        
+        // Update interview prep count
+        await updateUserStats(user.uid, 'interview');
+
+      } catch (error) {
+        console.error(error);
+        alert('Error generating interview prep. Please try again.');
+      } finally {
+        button.disabled = false;
+        button.textContent = 'Generate Interview Prep';
+      }
+    }
+
+    function openSkillModal() {
+      document.getElementById('skill-modal').classList.remove('hidden');
+      document.getElementById('skill-result').classList.add('hidden');
+    }
+
+    function closeSkillModal() {
+      document.getElementById('skill-modal').classList.add('hidden');
+    }
+
+    async function generateSkillAnalysis() {
+      const skills = document.getElementById('current-skills').value.trim();
+      const careerGoal = document.getElementById('career-goal').value.trim();
+
+      if (!skills || !careerGoal) {
+        alert('Please fill in both fields.');
+        return;
+      }
+
+      const user = firebase.auth().currentUser;
+      const button = event.target;
+      button.disabled = true;
+      button.textContent = 'Analyzing...';
+
+      try {
+        const res = await fetch('/ai_skill_analyzer', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            skills: skills,
+            career_goal: careerGoal,
+            email: user.email
+          })
+        });
+
+        const data = await res.json();
+        if (data.error) throw new Error(data.error);
+
+        document.getElementById('skill-content').textContent = data.skill_analysis;
+        document.getElementById('skill-result').classList.remove('hidden');
+        
+        // Update skill analysis count
+        await updateUserStats(user.uid, 'skill');
+
+      } catch (error) {
+        console.error(error);
+        alert('Error generating skill analysis. Please try again.');
+      } finally {
+        button.disabled = false;
+        button.textContent = 'Analyze My Skills';
+      }
+    }
+  </script>
+
+</body>
+</html>

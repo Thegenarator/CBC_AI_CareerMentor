@@ -1,0 +1,8 @@
+Flask
+openai
+firebase-admin
+python-dotenv
+fpdf
+httpx
+requests
+cryptography

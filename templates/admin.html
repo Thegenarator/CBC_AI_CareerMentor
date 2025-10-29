@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - CareerMentor Kenya</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .card-hover {
+            transition: all 0.3s ease;
+        }
+        .card-hover:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+        .stat-card {
+            background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05));
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        .loading-spinner {
+            border: 3px solid rgba(255,255,255,0.3);
+            border-top: 3px solid white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="gradient-bg min-h-screen">
+    <!-- Header -->
+    <header class="bg-white/10 backdrop-blur-md border-b border-white/20 p-4">
+        <div class="max-w-7xl mx-auto flex justify-between items-center">
+            <div class="flex items-center space-x-3">
+                <h1 class="text-2xl font-bold text-white">📊 Admin Dashboard</h1>
+                <span class="text-white/70 text-sm">CareerMentor Kenya</span>
+            </div>
+            <div class="flex items-center space-x-4">
+                <button onclick="refreshData()" class="bg-white/20 hover:bg-white/30 text-white px-4 py-2 rounded-lg transition duration-200 flex items-center space-x-2">
+                    <span>🔄</span>
+                    <span>Refresh</span>
+                </button>
+                <a href="/admin/logout" class="bg-red-500/20 hover:bg-red-500/30 text-red-200 px-4 py-2 rounded-lg transition duration-200 border border-red-500/30">
+                    Logout
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto p-6 space-y-8">
+        <!-- Stats Overview -->
+        <section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div class="stat-card rounded-xl p-6 card-hover fade-in">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-white/70 text-sm font-medium">Total Users</p>
+                        <p id="user-count" class="text-3xl font-bold text-white mt-2">-</p>
+                    </div>
+                    <div class="text-4xl opacity-50">👥</div>
+                </div>
+            </div>
+            
+            <div class="stat-card rounded-xl p-6 card-hover fade-in">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-white/70 text-sm font-medium">Chat Messages</p>
+                        <p id="message-count" class="text-3xl font-bold text-white mt-2">-</p>
+                    </div>
+                    <div class="text-4xl opacity-50">💬</div>
+                </div>
+            </div>
+            
+            <div class="stat-card rounded-xl p-6 card-hover fade-in">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-white/70 text-sm font-medium">CV Downloads</p>
+                        <p id="cv-count" class="text-3xl font-bold text-white mt-2">-</p>
+                    </div>
+                    <div class="text-4xl opacity-50">📄</div>
+                </div>
+            </div>
+            
+            <div class="stat-card rounded-xl p-6 card-hover fade-in">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-white/70 text-sm font-medium">Pathway Downloads</p>
+                        <p id="pathway-count" class="text-3xl font-bold text-white mt-2">-</p>
+                    </div>
+                    <div class="text-4xl opacity-50">🧭</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Charts Section -->
+        <section class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <!-- Daily Activity Chart -->
+            <div class="stat-card rounded-xl p-6 card-hover fade-in">
+                <h3 class="text-xl font-semibold text-white mb-4">📈 Daily Activity (Last 7 Days)</h3>
+                <canvas id="dailyChart" width="400" height="200"></canvas>
+            </div>
+            
+            <!-- User Growth Chart -->
+            <div class="stat-card rounded-xl p-6 card-hover fade-in">
+                <h3 class="text-xl font-semibold text-white mb-4">📊 Feature Usage</h3>
+                <canvas id="featureChart" width="400" height="200"></canvas>
+            </div>
+        </section>
+
+        <!-- Data Tables -->
+        <section class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <!-- Recent Messages -->
+            <div class="stat-card rounded-xl p-6 card-hover fade-in">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-xl font-semibold text-white">💬 Recent Messages</h3>
+                    <span id="messages-loading" class="loading-spinner hidden"></span>
+                </div>
+                <div id="chat-logs" class="space-y-3 max-h-96 overflow-y-auto">
+                    <div class="text-white/50 text-center py-8">Loading messages...</div>
+                </div>
+            </div>
+
+            <!-- Recent CV Downloads -->
+            <div class="stat-card rounded-xl p-6 card-hover fade-in">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-xl font-semibold text-white">📄 Recent CV Downloads</h3>
+                    <span id="cvs-loading" class="loading-spinner hidden"></span>
+                </div>
+                <div id="cv-logs" class="space-y-3 max-h-96 overflow-y-auto">
+                    <div class="text-white/50 text-center py-8">Loading CV downloads...</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Additional Tables -->
+        <section class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <!-- Recent Users -->
+            <div class="stat-card rounded-xl p-6 card-hover fade-in">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-xl font-semibold text-white">👤 Recent Users</h3>
+                    <span id="users-loading" class="loading-spinner hidden"></span>
+                </div>
+                <div id="user-logs" class="space-y-3 max-h-96 overflow-y-auto">
+                    <div class="text-white/50 text-center py-8">Loading users...</div>
+                </div>
+            </div>
+
+            <!-- Recent Pathway Downloads -->
+            <div class="stat-card rounded-xl p-6 card-hover fade-in">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-xl font-semibold text-white">🧭 Recent Pathway Downloads</h3>
+                    <span id="pathways-loading" class="loading-spinner hidden"></span>
+                </div>
+                <div id="pathway-logs" class="space-y-3 max-h-96 overflow-y-auto">
+                    <div class="text-white/50 text-center py-8">Loading pathway downloads...</div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        let dailyChart, featureChart;
+
+        async function loadStats() {
+            try {
+                const response = await fetch('/admin/api/stats');
+                const data = await response.json();
+                
+                if (data.error) {
+                    console.error('Error loading stats:', data.error);
+                    return;
+                }
+
+                // Update stat cards
+                document.getElementById('user-count').textContent = data.users;
+                document.getElementById('message-count').textContent = data.messages;
+                document.getElementById('cv-count').textContent = data.cvs;
+                document.getElementById('pathway-count').textContent = data.pathways;
+
+                // Update charts
+                updateDailyChart(data.daily_stats);
+                updateFeatureChart(data);
+
+            } catch (error) {
+                console.error('Error loading stats:', error);
+            }
+        }
+
+        function updateDailyChart(dailyStats) {
+            const ctx = document.getElementById('dailyChart').getContext('2d');
+            
+            if (dailyChart) {
+                dailyChart.destroy();
+            }
+
+            const labels = dailyStats.map(stat => {
+                const date = new Date(stat.date);
+                return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+            }).reverse();
+
+            const messageData = dailyStats.map(stat => stat.messages).reverse();
+            const cvData = dailyStats.map(stat => stat.cvs).reverse();
+
+            dailyChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Messages',
+                        data: messageData,
+                        borderColor: 'rgba(255, 255, 255, 0.8)',
+                        backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                        tension: 0.4
+                    }, {
+                        label: 'CV Downloads',
+                        data: cvData,
+                        borderColor: 'rgba(255, 255, 255, 0.6)',
+                        backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: 'white'
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            ticks: {
+                                color: 'rgba(255, 255, 255, 0.7)'
+                            },
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            }
+                        },
+                        y: {
+                            ticks: {
+                                color: 'rgba(255, 255, 255, 0.7)'
+                            },
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateFeatureChart(stats) {
+            const ctx = document.getElementById('featureChart').getContext('2d');
+            
+            if (featureChart) {
+                featureChart.destroy();
+            }
+
+            featureChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Messages', 'CV Downloads', 'Pathway Downloads'],
+                    datasets: [{
+                        data: [stats.messages, stats.cvs, stats.pathways],
+                        backgroundColor: [
+                            'rgba(255, 255, 255, 0.8)',
+                            'rgba(255, 255, 255, 0.6)',
+                            'rgba(255, 255, 255, 0.4)'
+                        ],
+                        borderColor: [
+                            'rgba(255, 255, 255, 1)',
+                            'rgba(255, 255, 255, 1)',
+                            'rgba(255, 255, 255, 1)'
+                        ],
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: 'white'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        async function loadMessages() {
+            const loading = document.getElementById('messages-loading');
+            const container = document.getElementById('chat-logs');
+            
+            loading.classList.remove('hidden');
+            
+            try {
+                const response = await fetch('/admin/api/messages');
+                const messages = await response.json();
+                
+                if (messages.error) {
+                    container.innerHTML = '<div class="text-red-300 text-center py-8">Error loading messages</div>';
+                    return;
+                }
+
+                container.innerHTML = messages.length === 0 ? 
+                    '<div class="text-white/50 text-center py-8">No messages found</div>' :
+                    messages.map(msg => `
+                        <div class="bg-white/10 rounded-lg p-4 border border-white/20">
+                            <div class="flex justify-between items-start mb-2">
+                                <span class="text-white font-medium">${msg.user}</span>
+                                <span class="text-white/50 text-xs">${msg.timestamp}</span>
+                            </div>
+                            <p class="text-white/80 text-sm mb-2">${msg.question}</p>
+                            <p class="text-white/60 text-xs italic">${msg.reply.substring(0, 100)}${msg.reply.length > 100 ? '...' : ''}</p>
+                        </div>
+                    `).join('');
+                    
+            } catch (error) {
+                container.innerHTML = '<div class="text-red-300 text-center py-8">Error loading messages</div>';
+            } finally {
+                loading.classList.add('hidden');
+            }
+        }
+
+        async function loadCVs() {
+            const loading = document.getElementById('cvs-loading');
+            const container = document.getElementById('cv-logs');
+            
+            loading.classList.remove('hidden');
+            
+            try {
+                const response = await fetch('/admin/api/cv_downloads');
+                const cvs = await response.json();
+                
+                if (cvs.error) {
+                    container.innerHTML = '<div class="text-red-300 text-center py-8">Error loading CV downloads</div>';
+                    return;
+                }
+
+                container.innerHTML = cvs.length === 0 ? 
+                    '<div class="text-white/50 text-center py-8">No CV downloads found</div>' :
+                    cvs.map(cv => `
+                        <div class="bg-white/10 rounded-lg p-4 border border-white/20">
+                            <div class="flex justify-between items-start mb-2">
+                                <span class="text-white font-medium">${cv.name}</span>
+                                <span class="text-white/50 text-xs">${cv.timestamp}</span>
+                            </div>
+                            <p class="text-white/80 text-sm">${cv.email}</p>
+                        </div>
+                    `).join('');
+                    
+            } catch (error) {
+                container.innerHTML = '<div class="text-red-300 text-center py-8">Error loading CV downloads</div>';
+            } finally {
+                loading.classList.add('hidden');
+            }
+        }
+
+        async function loadUsers() {
+            const loading = document.getElementById('users-loading');
+            const container = document.getElementById('user-logs');
+            
+            loading.classList.remove('hidden');
+            
+            try {
+                const response = await fetch('/admin/api/users');
+                const users = await response.json();
+                
+                if (users.error) {
+                    container.innerHTML = '<div class="text-red-300 text-center py-8">Error loading users</div>';
+                    return;
+                }
+
+                container.innerHTML = users.length === 0 ? 
+                    '<div class="text-white/50 text-center py-8">No users found</div>' :
+                    users.map(user => `
+                        <div class="bg-white/10 rounded-lg p-4 border border-white/20">
+                            <div class="flex justify-between items-start mb-2">
+                                <span class="text-white font-medium">${user.name}</span>
+                                <span class="text-white/50 text-xs">${user.timestamp}</span>
+                            </div>
+                            <p class="text-white/80 text-sm">${user.email}</p>
+                            <span class="inline-block bg-white/20 text-white/80 text-xs px-2 py-1 rounded mt-2">${user.provider}</span>
+                        </div>
+                    `).join('');
+                    
+            } catch (error) {
+                container.innerHTML = '<div class="text-red-300 text-center py-8">Error loading users</div>';
+            } finally {
+                loading.classList.add('hidden');
+            }
+        }
+
+        async function loadPathways() {
+            const loading = document.getElementById('pathways-loading');
+            const container = document.getElementById('pathway-logs');
+            
+            loading.classList.remove('hidden');
+            
+            try {
+                const response = await fetch('/admin/api/pathway_downloads');
+                const pathways = await response.json();
+                
+                if (pathways.error) {
+                    container.innerHTML = '<div class="text-red-300 text-center py-8">Error loading pathway downloads</div>';
+                    return;
+                }
+
+                container.innerHTML = pathways.length === 0 ? 
+                    '<div class="text-white/50 text-center py-8">No pathway downloads found</div>' :
+                    pathways.map(pathway => `
+                        <div class="bg-white/10 rounded-lg p-4 border border-white/20">
+                            <div class="flex justify-between items-start mb-2">
+                                <span class="text-white font-medium">${pathway.name}</span>
+                                <span class="text-white/50 text-xs">${pathway.timestamp}</span>
+                            </div>
+                            <p class="text-white/80 text-sm mb-2">${pathway.email}</p>
+                            <p class="text-white/60 text-xs italic">${pathway.prompt.substring(0, 80)}${pathway.prompt.length > 80 ? '...' : ''}</p>
+                        </div>
+                    `).join('');
+                    
+            } catch (error) {
+                container.innerHTML = '<div class="text-red-300 text-center py-8">Error loading pathway downloads</div>';
+            } finally {
+                loading.classList.add('hidden');
+            }
+        }
+
+        async function refreshData() {
+            await Promise.all([
+                loadStats(),
+                loadMessages(),
+                loadCVs(),
+                loadUsers(),
+                loadPathways()
+            ]);
+        }
+
+        // Initialize dashboard
+        document.addEventListener('DOMContentLoaded', function() {
+            refreshData();
+            
+            // Auto-refresh every 30 seconds
+            setInterval(refreshData, 30000);
+        });
+    </script>
+</body>
+</html>

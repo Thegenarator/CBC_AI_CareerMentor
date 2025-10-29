@@ -1,0 +1,221 @@
+# AI CareerMentor Kenya - Git Ignore File
+# This file prevents sensitive information from being committed to version control
+
+# ===========================================
+# Environment Variables & Configuration
+# ===========================================
+.env
+.env.local
+.env.development
+.env.production
+.env.staging
+*.env
+
+# ===========================================
+# Firebase Configuration
+# ===========================================
+firebase_config.json
+firebase-adminsdk-*.json
+serviceAccountKey.json
+google-services.json
+
+# ===========================================
+# API Keys & Secrets
+# ===========================================
+api_keys.txt
+secrets.txt
+credentials.json
+*.key
+*.pem
+*.p12
+
+# ===========================================
+# M-Pesa Configuration
+# ===========================================
+mpesa_config.json
+mpesa_credentials.txt
+mpesa_keys.txt
+
+# ===========================================
+# Python
+# ===========================================
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# ===========================================
+# Virtual Environments
+# ===========================================
+venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+.venv/
+.env/
+
+# ===========================================
+# IDE & Editor Files
+# ===========================================
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# ===========================================
+# Logs & Temporary Files
+# ===========================================
+logs.txt
+*.log
+*.tmp
+*.temp
+temp/
+tmp/
+
+# ===========================================
+# Database Files
+# ===========================================
+*.db
+*.sqlite
+*.sqlite3
+database.db
+
+# ===========================================
+# Uploads & User Content
+# ===========================================
+uploads/
+user_uploads/
+static/uploads/
+media/
+
+# ===========================================
+# Generated Files
+# ===========================================
+*.pdf
+generated_cvs/
+generated_pathways/
+downloads/
+
+# ===========================================
+# Testing
+# ===========================================
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.nox/
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+
+# ===========================================
+# Jupyter Notebook
+# ===========================================
+.ipynb_checkpoints
+
+# ===========================================
+# Flask
+# ===========================================
+instance/
+.webassets-cache
+
+# ===========================================
+# Node.js (if using any frontend build tools)
+# ===========================================
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# ===========================================
+# OS Generated Files
+# ===========================================
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# ===========================================
+# Backup Files
+# ===========================================
+*.bak
+*.backup
+*.old
+backup/
+backups/
+
+# ===========================================
+# Documentation Build
+# ===========================================
+docs/_build/
+site/
+
+# ===========================================
+# Deployment
+# ===========================================
+.vercel
+.netlify
+.heroku
+
+# ===========================================
+# Security & Sensitive Data
+# ===========================================
+secrets/
+private/
+confidential/
+*.secret
+*.private
+*.confidential
+
+# ===========================================
+# Local Development
+# ===========================================
+local_settings.py
+local_config.py
+dev_settings.py
+
+# ===========================================
+# Cache & Temporary
+# ===========================================
+.cache/
+cache/
+*.cache
+*.pyc
+*.pyo
+
+# ===========================================
+# Specific to this project
+# ===========================================
+# Remove any files that might contain sensitive information
+admin_credentials.txt
+user_data.json
+payment_logs.txt
+mpesa_logs.txt
+api_usage.txt

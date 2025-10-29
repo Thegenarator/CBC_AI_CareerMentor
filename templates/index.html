@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>AI CareerMentor Kenya - Your CBC Journey Starts Here</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+  <style>
+    .gradient-bg {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+    .hero-gradient {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+    }
+    .card-hover {
+      transition: all 0.3s ease;
+    }
+    .card-hover:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+    }
+    .glass-effect {
+      backdrop-filter: blur(10px);
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    .fade-in {
+      animation: fadeIn 0.8s ease-in;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .slide-in-left {
+      animation: slideInLeft 0.8s ease-out;
+    }
+    @keyframes slideInLeft {
+      from { opacity: 0; transform: translateX(-50px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+    .slide-in-right {
+      animation: slideInRight 0.8s ease-out;
+    }
+    @keyframes slideInRight {
+      from { opacity: 0; transform: translateX(50px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+    .pulse-animation {
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+    }
+  </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+  <!-- Navigation -->
+  <nav class="bg-white/90 backdrop-blur-md shadow-lg fixed w-full top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex justify-between items-center h-16">
+        <div class="flex items-center space-x-3">
+          <div class="w-10 h-10 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
+            <i class="fas fa-graduation-cap text-white text-lg"></i>
+          </div>
+          <h1 class="text-xl font-bold text-gray-800">AI CareerMentor Kenya</h1>
+        </div>
+        <div id="auth-buttons" class="flex items-center space-x-3">
+          <button onclick="openModal('login')" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition duration-200 flex items-center space-x-2">
+            <i class="fas fa-sign-in-alt"></i>
+            <span>Login</span>
+          </button>
+          <button onclick="openModal('register')" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition duration-200 flex items-center space-x-2">
+            <i class="fas fa-user-plus"></i>
+            <span>Register</span>
+          </button>
+          <button onclick="googleLogin()" class="bg-gray-800 text-white px-4 py-2 rounded-lg hover:bg-gray-900 transition duration-200 flex items-center space-x-2">
+            <i class="fab fa-google"></i>
+            <span>Google</span>
+          </button>
+          <button onclick="logout()" class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition duration-200 hidden" id="logout-btn">
+            <i class="fas fa-sign-out-alt"></i>
+            Logout
+          </button>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <section class="hero-gradient min-h-screen flex items-center pt-16">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+        <!-- Left Content -->
+        <div class="text-white fade-in">
+          <h1 class="text-5xl lg:text-6xl font-bold mb-6 leading-tight">
+            Your CBC Journey
+            <span class="block text-yellow-300">Starts Here</span>
+          </h1>
+          <p class="text-xl mb-8 text-white/90 leading-relaxed">
+            Discover your potential with AI-powered career guidance, personalized CBC pathway recommendations, 
+            professional CV generation, and advanced career assessment tools. Built specifically for Kenyan students.
+          </p>
+          <div class="flex flex-col sm:flex-row gap-4">
+            <button onclick="redirectToDashboard()" class="bg-white text-purple-600 px-8 py-4 rounded-lg font-semibold hover:bg-gray-100 transition duration-200 flex items-center justify-center space-x-2 pulse-animation">
+              <i class="fas fa-rocket"></i>
+              <span>Get Started Free</span>
+            </button>
+            <button onclick="scrollToFeatures()" class="border-2 border-white text-white px-8 py-4 rounded-lg font-semibold hover:bg-white hover:text-purple-600 transition duration-200 flex items-center justify-center space-x-2">
+              <i class="fas fa-play"></i>
+              <span>Learn More</span>
+            </button>
+          </div>
+        </div>
+        
+        <!-- Right Content - Feature Cards -->
+        <div class="space-y-6 slide-in-right">
+          <div class="glass-effect rounded-2xl p-6 card-hover">
+            <div class="flex items-center space-x-4 mb-4">
+              <div class="w-12 h-12 bg-blue-500 rounded-xl flex items-center justify-center">
+                <i class="fas fa-robot text-white text-xl"></i>
+              </div>
+              <h3 class="text-xl font-semibold text-white">AI Career Mentor</h3>
+            </div>
+            <p class="text-white/80">Get instant answers to your CBC and career questions from our intelligent AI mentor.</p>
+          </div>
+          
+          <div class="glass-effect rounded-2xl p-6 card-hover">
+            <div class="flex items-center space-x-4 mb-4">
+              <div class="w-12 h-12 bg-green-500 rounded-xl flex items-center justify-center">
+                <i class="fas fa-file-alt text-white text-xl"></i>
+              </div>
+              <h3 class="text-xl font-semibold text-white">AI CV Generator</h3>
+            </div>
+            <p class="text-white/80">Create professional CVs tailored to your skills and career aspirations.</p>
+          </div>
+          
+          <div class="glass-effect rounded-2xl p-6 card-hover">
+            <div class="flex items-center space-x-4 mb-4">
+              <div class="w-12 h-12 bg-purple-500 rounded-xl flex items-center justify-center">
+                <i class="fas fa-route text-white text-xl"></i>
+              </div>
+              <h3 class="text-xl font-semibold text-white">CBC Pathway Guide</h3>
+            </div>
+            <p class="text-white/80">Discover the perfect CBC Senior School pathway based on your unique strengths.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features Section -->
+  <section id="features" class="py-20 bg-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-16">
+        <h2 class="text-4xl font-bold text-gray-800 mb-4">Why Choose AI CareerMentor?</h2>
+        <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+          We combine cutting-edge AI technology with deep understanding of Kenya's CBC curriculum 
+          to provide personalized guidance, career assessments, interview preparation, and skill analysis for your educational journey.
+        </p>
+      </div>
+      
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div class="text-center card-hover">
+          <div class="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-6">
+            <i class="fas fa-brain text-blue-600 text-3xl"></i>
+          </div>
+          <h3 class="text-2xl font-semibold text-gray-800 mb-4">Smart AI Guidance</h3>
+          <p class="text-gray-600 leading-relaxed">
+            Our AI mentor understands CBC curriculum and provides personalized advice based on your interests and strengths.
+          </p>
+        </div>
+        
+        <div class="text-center card-hover">
+          <div class="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
+            <i class="fas fa-graduation-cap text-green-600 text-3xl"></i>
+          </div>
+          <h3 class="text-2xl font-semibold text-gray-800 mb-4">CBC Expertise</h3>
+          <p class="text-gray-600 leading-relaxed">
+            Built specifically for Kenyan students with deep knowledge of CBC pathways and career opportunities.
+          </p>
+        </div>
+        
+        <div class="text-center card-hover">
+          <div class="w-20 h-20 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-6">
+            <i class="fas fa-magic text-purple-600 text-3xl"></i>
+          </div>
+          <h3 class="text-2xl font-semibold text-gray-800 mb-4">Instant Results</h3>
+          <p class="text-gray-600 leading-relaxed">
+            Get immediate answers, generate CVs, and discover pathways in seconds, not hours.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Premium Features Section -->
+  <section class="py-20 bg-gradient-to-r from-yellow-500 to-orange-500">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-16">
+        <div class="flex items-center justify-center space-x-3 mb-4">
+          <div class="w-12 h-12 bg-white rounded-xl flex items-center justify-center">
+            <i class="fas fa-crown text-yellow-600 text-xl"></i>
+          </div>
+          <h2 class="text-4xl font-bold text-white">Premium AI Career Tools</h2>
+        </div>
+        <p class="text-xl text-white/90 max-w-3xl mx-auto">
+          Advanced AI-powered career development tools for comprehensive career planning and professional growth
+        </p>
+      </div>
+      
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <!-- AI Career Assessment -->
+        <div class="bg-white/10 backdrop-blur-md rounded-2xl p-8 border border-white/20 card-hover">
+          <div class="text-center mb-6">
+            <div class="w-16 h-16 bg-blue-500 rounded-full flex items-center justify-center mx-auto mb-4">
+              <i class="fas fa-brain text-white text-2xl"></i>
+            </div>
+            <h3 class="text-2xl font-semibold text-white mb-3">AI Career Assessment</h3>
+            <p class="text-white/80 leading-relaxed">
+              Comprehensive personality and career assessment using Big Five traits, Holland's RIASEC model, 
+              and learning style analysis to recommend perfect CBC pathways.
+            </p>
+          </div>
+          <div class="space-y-3 mb-6">
+            <div class="flex items-center space-x-2 text-white/90">
+              <i class="fas fa-check text-green-300"></i>
+              <span class="text-sm">10 comprehensive questions</span>
+            </div>
+            <div class="flex items-center space-x-2 text-white/90">
+              <i class="fas fa-check text-green-300"></i>
+              <span class="text-sm">Personality analysis</span>
+            </div>
+            <div class="flex items-center space-x-2 text-white/90">
+              <i class="fas fa-check text-green-300"></i>
+              <span class="text-sm">Career interest mapping</span>
+            </div>
+            <div class="flex items-center space-x-2 text-white/90">
+              <i class="fas fa-check text-green-300"></i>
+              <span class="text-sm">2-year action plan</span>
+            </div>
+          </div>
+          <button onclick="redirectToDashboard()" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 px-6 rounded-lg transition duration-200 font-semibold">
+            Start Assessment
+          </button>
+        </div>
+
+        <!-- AI Interview Prep -->
+        <div class="bg-white/10 backdrop-blur-md rounded-2xl p-8 border border-white/20 card-hover">
+          <div class="text-center mb-6">
+            <div class="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-4">
+              <i class="fas fa-handshake text-white text-2xl"></i>
+            </div>
+            <h3 class="text-2xl font-semibold text-white mb-3">AI Interview Prep</h3>
+            <p class="text-white/80 leading-relaxed">
+              Personalized interview preparation with job-specific questions, STAR method answers, 
+              and Kenyan market salary negotiation tips.
+            </p>
+          </div>
+          <div class="space-y-3 mb-6">
+            <div class="flex items-center space-x-2 text-white/90">
+              <i class="fas fa-check text-green-300"></i>
+              <span class="text-sm">Job-specific questions</span>
+            </div>
+            <div class="flex items-center space-x-2 text-white/90">
+              <i class="fas fa-check text-green-300"></i>
+              <span class="text-sm">STAR method templates</span>
+            </div>
+            <div class="flex items-center space-x-2 text-white/90">
+              <i class="fas fa-check text-green-300"></i>
+              <span class="text-sm">Salary negotiation tips</span>
+            </div>
+            <div class="flex items-center space-x-2 text-white/90">
+              <i class="fas fa-check text-green-300"></i>
+              <span class="text-sm">Follow-up templates</span>
+            </div>
+          </div>
+          <button onclick="redirectToDashboard()" class="w-full bg-green-600 hover:bg-green-700 text-white py-3 px-6 rounded-lg transition duration-200 font-semibold">
+            Prepare for Interview
+          </button>
+        </div>
+
+        <!-- AI Skill Analyzer -->
+        <div class="bg-white/10 backdrop-blur-md rounded-2xl p-8 border border-white/20 card-hover">
+          <div class="text-center mb-6">
+            <div class="w-16 h-16 bg-purple-500 rounded-full flex items-center justify-center mx-auto mb-4">
+              <i class="fas fa-chart-line text-white text-2xl"></i>
+            </div>
+            <h3 class="text-2xl font-semibold text-white mb-3">AI Skill Analyzer</h3>
+            <p class="text-white/80 leading-relaxed">
+              Analyze skills gaps, get development roadmaps, course recommendations, 
+              and certification guidance tailored for Kenyan professionals.
+            </p>
+          </div>
+          <div class="space-y-3 mb-6">
+            <div class="flex items-center space-x-2 text-white/90">
+              <i class="fas fa-check text-green-300"></i>
+              <span class="text-sm">Skills gap analysis</span>
+            </div>
+            <div class="flex items-center space-x-2 text-white/90">
+              <i class="fas fa-check text-green-300"></i>
+              <span class="text-sm">Development roadmap</span>
+            </div>
+            <div class="flex items-center space-x-2 text-white/90">
+              <i class="fas fa-check text-green-300"></i>
+              <span class="text-sm">Course recommendations</span>
+            </div>
+            <div class="flex items-center space-x-2 text-white/90">
+              <i class="fas fa-check text-green-300"></i>
+              <span class="text-sm">Certification guidance</span>
+            </div>
+          </div>
+          <button onclick="redirectToDashboard()" class="w-full bg-purple-600 hover:bg-purple-700 text-white py-3 px-6 rounded-lg transition duration-200 font-semibold">
+            Analyze Skills
+          </button>
+        </div>
+      </div>
+      
+      <!-- Premium CTA -->
+      <div class="text-center mt-12">
+        <div class="bg-white/10 backdrop-blur-md rounded-2xl p-8 border border-white/20 max-w-4xl mx-auto">
+          <h3 class="text-2xl font-bold text-white mb-4">Unlock Your Full Potential</h3>
+          <p class="text-white/90 mb-6">
+            Get access to all premium AI tools with personalized career guidance, 
+            professional development insights, and comprehensive career planning.
+          </p>
+          <div class="flex flex-col sm:flex-row gap-4 justify-center">
+            <button onclick="redirectToDashboard()" class="bg-white text-orange-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition duration-200 flex items-center justify-center space-x-2">
+              <i class="fas fa-rocket"></i>
+              <span>Access Premium Features</span>
+            </button>
+            <button onclick="scrollToFeatures()" class="border-2 border-white text-white px-8 py-3 rounded-lg font-semibold hover:bg-white hover:text-orange-600 transition duration-200 flex items-center justify-center space-x-2">
+              <i class="fas fa-info-circle"></i>
+              <span>Learn More</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CBC Explanation Section -->
+  <section class="py-20 bg-gray-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+        <div class="slide-in-left">
+          <h2 class="text-4xl font-bold text-gray-800 mb-6">Understanding CBC</h2>
+          <p class="text-lg text-gray-600 mb-8 leading-relaxed">
+            The Competency-Based Curriculum (CBC) is Kenya's new education system designed to nurture 
+            every learner's potential. It focuses on developing competencies rather than just academic knowledge.
+          </p>
+          <div class="space-y-4">
+            <div class="flex items-center space-x-3">
+              <div class="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
+                <i class="fas fa-check text-white text-sm"></i>
+              </div>
+              <span class="text-gray-700">Personalized learning paths</span>
+            </div>
+            <div class="flex items-center space-x-3">
+              <div class="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
+                <i class="fas fa-check text-white text-sm"></i>
+              </div>
+              <span class="text-gray-700">Focus on practical skills</span>
+            </div>
+            <div class="flex items-center space-x-3">
+              <div class="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
+                <i class="fas fa-check text-white text-sm"></i>
+              </div>
+              <span class="text-gray-700">Multiple career pathways</span>
+            </div>
+          </div>
+        </div>
+        
+        <div class="slide-in-right">
+          <div class="bg-white rounded-2xl p-8 shadow-xl">
+            <h3 class="text-2xl font-semibold text-gray-800 mb-6">What is CBC?</h3>
+            <div class="prose prose-gray max-w-none">
+              <p class="text-gray-600 leading-relaxed whitespace-pre-wrap">{{ cbc_explainer }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Quick CV Generator Section -->
+  <section class="py-20 bg-gradient-to-r from-green-500 to-blue-600">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <h2 class="text-4xl font-bold text-white mb-6">Try Our AI CV Generator</h2>
+      <p class="text-xl text-white/90 mb-8">
+        Get a professional CV in minutes. Just describe yourself and let AI do the rest.
+      </p>
+      
+      <div class="bg-white/10 backdrop-blur-md rounded-2xl p-8 border border-white/20">
+        <textarea id="cv-prompt" rows="4" 
+          placeholder="E.g. I am a Form 4 graduate interested in hospitality and customer service. I enjoy working with people and have good communication skills..." 
+          class="w-full p-4 border border-white/30 rounded-lg bg-white/20 text-white placeholder-white/70 focus:outline-none focus:ring-2 focus:ring-white/50 resize-none"></textarea>
+        
+        <button onclick="generateAICV()" 
+          class="mt-6 bg-white text-green-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition duration-200 flex items-center space-x-2 mx-auto">
+          <i class="fas fa-magic"></i>
+          <span>Generate My AI CV</span>
+        </button>
+        
+        <!-- CV Preview -->
+        <div id="cv-preview-box" class="mt-6 hidden">
+          <div class="bg-white rounded-lg p-6 text-left">
+            <h4 class="text-lg font-semibold text-gray-700 mb-4">CV Preview:</h4>
+            <div id="cv-preview" class="bg-gray-50 p-4 rounded border text-sm whitespace-pre-wrap text-gray-700"></div>
+            <button onclick="downloadCVIndexPDF()" class="mt-4 bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition duration-200 flex items-center space-x-2">
+              <i class="fas fa-download"></i>
+              <span>Download as PDF</span>
+            </button>
+          </div>
+        </div>
+        
+        <p id="cv-status" class="mt-4 text-white/80"></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA Section -->
+  <section class="py-20 bg-gray-800">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <h2 class="text-4xl font-bold text-white mb-6">Ready to Start Your Journey?</h2>
+      <p class="text-xl text-gray-300 mb-8">
+        Join thousands of Kenyan students who are already discovering their potential with AI CareerMentor.
+      </p>
+      <button onclick="redirectToDashboard()" class="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-12 py-4 rounded-lg font-semibold hover:from-blue-700 hover:to-purple-700 transition duration-200 text-lg">
+        Get Started Now - It's Free!
+      </button>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="bg-gray-900 text-white py-12">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+        <div>
+          <div class="flex items-center space-x-3 mb-4">
+            <div class="w-10 h-10 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
+              <i class="fas fa-graduation-cap text-white text-lg"></i>
+            </div>
+            <h3 class="text-xl font-bold">AI CareerMentor</h3>
+          </div>
+          <p class="text-gray-400">
+            Empowering Kenyan students with AI-powered career guidance and CBC pathway discovery.
+          </p>
+        </div>
+        
+        <div>
+          <h4 class="text-lg font-semibold mb-4">Features</h4>
+          <ul class="space-y-2 text-gray-400">
+            <li>AI Career Mentor</li>
+            <li>CV Generator</li>
+            <li>CBC Pathway Guide</li>
+            <li>AI Career Assessment</li>
+            <li>AI Interview Prep</li>
+            <li>AI Skill Analyzer</li>
+          </ul>
+        </div>
+        
+        <div>
+          <h4 class="text-lg font-semibold mb-4">Support</h4>
+          <ul class="space-y-2 text-gray-400">
+            <li>Help Center</li>
+            <li>Contact Us</li>
+            <li>Privacy Policy</li>
+            <li>Terms of Service</li>
+          </ul>
+        </div>
+        
+        <div>
+          <h4 class="text-lg font-semibold mb-4">Connect</h4>
+          <div class="flex space-x-4">
+            <a href="#" class="text-gray-400 hover:text-white transition duration-200">
+              <i class="fab fa-twitter text-xl"></i>
+            </a>
+            <a href="#" class="text-gray-400 hover:text-white transition duration-200">
+              <i class="fab fa-facebook text-xl"></i>
+            </a>
+            <a href="#" class="text-gray-400 hover:text-white transition duration-200">
+              <i class="fab fa-instagram text-xl"></i>
+            </a>
+            <a href="#" class="text-gray-400 hover:text-white transition duration-200">
+              <i class="fab fa-linkedin text-xl"></i>
+            </a>
+          </div>
+        </div>
+      </div>
+      
+      <div class="border-t border-gray-700 mt-8 pt-8 text-center text-gray-400">
+        <p>&copy; 2024 AI CareerMentor Kenya. All rights reserved.</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Auth Modal -->
+  <div id="auth-modal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center z-50 p-4">
+    <div class="bg-white rounded-2xl p-8 w-full max-w-md shadow-2xl">
+      <h2 id="auth-title" class="text-2xl font-bold text-center mb-6"></h2>
+      <div id="name-fields" class="space-y-4 hidden">
+        <input type="text" id="first-name" placeholder="First Name" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+        <input type="text" id="second-name" placeholder="Last Name" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+      </div>
+      <input type="email" id="auth-email" placeholder="Email" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent mb-4" />
+      <input type="password" id="auth-password" placeholder="Password" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent mb-4" />
+      <input type="password" id="confirm-password" placeholder="Confirm Password" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent mb-4 hidden" />
+      <button id="auth-action" class="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition duration-200 mb-4">Submit</button>
+      <button onclick="closeModal()" class="text-gray-500 text-sm block w-full text-center hover:text-gray-700 transition duration-200">Cancel</button>
+    </div>
+  </div>
+
+  <!-- Firebase Auth and AI CV Logic -->
+  <script>
+    // Firebase Config
+    const firebaseConfig = {
+      apiKey: "AIzaSyDTm-ckLXcOcRM_4g5hTs94Tm4W_BUx-eI",
+      authDomain: "cbch-6178c.firebaseapp.com",
+      projectId: "cbch-6178c",
+      appId: "1:577618974847:web:730ae29830d14fc0a6c74a"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+
+    function openModal(mode) {
+      document.getElementById("auth-modal").classList.remove("hidden");
+      document.getElementById("auth-title").textContent = mode === "login" ? "Welcome Back" : "Create Account";
+      document.getElementById("auth-action").onclick = () => authHandler(mode);
+      const nameFields = document.getElementById("name-fields");
+      const confirmPw = document.getElementById("confirm-password");
+      const showExtra = mode === "register";
+      nameFields.classList.toggle("hidden", !showExtra);
+      confirmPw.classList.toggle("hidden", !showExtra);
+    }
+
+    function closeModal() {
+      document.getElementById("auth-modal").classList.add("hidden");
+    }
+
+    function authHandler(mode) {
+      const email = document.getElementById("auth-email").value.trim();
+      const password = document.getElementById("auth-password").value;
+      const confirmPw = document.getElementById("confirm-password").value;
+      const first = document.getElementById("first-name").value.trim();
+      const second = document.getElementById("second-name").value.trim();
+
+      if (mode === "login") {
+        auth.signInWithEmailAndPassword(email, password)
+          .then(res => {
+            closeModal();
+            redirectToDashboard();
+          })
+          .catch(err => alert(err.message));
+      } else {
+        if (!first || !second) {
+          alert("Enter full name");
+          return;
+        }
+        if (password !== confirmPw) {
+          alert("Passwords do not match");
+          return;
+        }
+        const full = `${first} ${second}`;
+        auth.createUserWithEmailAndPassword(email, password)
+          .then(res => res.user.updateProfile({ displayName: full }))
+          .then(() => {
+            closeModal();
+            redirectToDashboard();
+          })
+          .catch(err => alert(err.message));
+      }
+    }
+
+    auth.onAuthStateChanged(user => {
+      const logoutBtn = document.getElementById("logout-btn");
+      if (user) {
+        logoutBtn.classList.remove("hidden");
+      } else {
+        logoutBtn.classList.add("hidden");
+      }
+    });
+
+    function googleLogin() {
+      const provider = new firebase.auth.GoogleAuthProvider();
+      auth.signInWithPopup(provider)
+        .then(async res => {
+          const user = res.user;
+          await db.collection("users").doc(user.uid).set({
+            name: user.displayName || "",
+            email: user.email,
+            provider: "google",
+            timestamp: firebase.firestore.FieldValue.serverTimestamp()
+          }, { merge: true });
+          redirectToDashboard();
+        })
+        .catch(err => {
+          console.error("Google Sign-In Error:", err);
+          alert("Google Sign-in failed");
+        });
+    }
+
+    function logout() {
+      auth.signOut().then(() => {
+        window.location.reload();
+      });
+    }
+
+    function redirectToDashboard() {
+      window.location.href = "/dashboard";
+    }
+
+    function scrollToFeatures() {
+      document.getElementById('features').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    // 🧠 AI CV Generation Function
+    let latestCVPrompt = ""; // Store for reuse when downloading
+
+    function generateAICV() {
+      const prompt = document.getElementById("cv-prompt").value.trim();
+      const status = document.getElementById("cv-status");
+      const previewBox = document.getElementById("cv-preview-box");
+      const previewDiv = document.getElementById("cv-preview");
+
+      if (!prompt) {
+        alert("Please describe yourself or your goals.");
+        return;
+      }
+
+      status.textContent = "Generating preview... Please wait ⏳";
+      previewBox.classList.add("hidden");
+
+      fetch('/preview_cv_index', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: "Anonymous",
+          email: "none@cbc.com",
+          education: "N/A",
+          skills: "N/A",
+          interests: prompt
+        })
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.error) throw new Error(data.error);
+        previewDiv.textContent = data.preview;
+        previewBox.classList.remove("hidden");
+        status.textContent = "✅ Preview ready! Click below to download.";
+        latestCVPrompt = prompt;
+      })
+      .catch(error => {
+        console.error(error);
+        status.textContent = "❌ Error generating CV preview. Try again.";
+      });
+    }
+
+    function downloadCVIndexPDF() {
+      const status = document.getElementById("cv-status");
+      status.textContent = "Generating PDF...";
+
+      fetch('/generate_cv', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: "Anonymous",
+          email: "none@cbc.com",
+          prompt: latestCVPrompt
+        })
+      })
+      .then(response => {
+        if (!response.ok) throw new Error("CV generation failed.");
+        return response.blob();
+      })
+      .then(blob => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "AI_Generated_CV.pdf";
+        a.click();
+        status.textContent = "✅ CV downloaded successfully!";
+      })
+      .catch(error => {
+        console.error(error);
+        status.textContent = "❌ Error downloading CV.";
+      });
+    }
+  </script>
+</body>
+</html>
