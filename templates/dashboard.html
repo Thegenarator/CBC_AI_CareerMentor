@@ -6,6 +6,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   
   <!-- Tailwind CSS -->
+  <!-- Tailwind CSS CDN - Development Only -->
+  <!-- For production, install Tailwind CSS as PostCSS plugin or use CLI -->
   <script src="https://cdn.tailwindcss.com"></script>
   
   <!-- Firebase -->
@@ -659,14 +661,8 @@
   </div>
 
   <script>
-    // Firebase Config - Load from environment variables
-    // NOTE: Replace these with your actual Firebase configuration
-    const firebaseConfig = {
-      apiKey: "YOUR_FIREBASE_API_KEY",
-      authDomain: "YOUR_AUTH_DOMAIN",
-      projectId: "YOUR_PROJECT_ID",
-      appId: "YOUR_APP_ID"
-    };
+    // Firebase Config - Loaded from Flask backend
+    const firebaseConfig = {{ firebase_config | tojson }};
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
     const db = firebase.firestore();

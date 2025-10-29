@@ -19,6 +19,14 @@ load_dotenv()
 OPENAI_KEY = os.getenv("OPENAI_API_KEY")
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 
+# Firebase Configuration for frontend
+FIREBASE_CONFIG = {
+    'apiKey': os.getenv('FIREBASE_API_KEY', 'AIzaSyDTm-ckLXcOcRM_4g5hTs94Tm4W_BUx-eI'),
+    'authDomain': os.getenv('FIREBASE_AUTH_DOMAIN', 'cbch-6178c.firebaseapp.com'),
+    'projectId': os.getenv('FIREBASE_PROJECT_ID', 'cbch-6178c'),
+    'appId': os.getenv('FIREBASE_APP_ID', '1:577618974847:web:730ae29830d14fc0a6c74a')
+}
+
 # OpenAI Client
 openai_client = openai.OpenAI(api_key=OPENAI_KEY)
 
@@ -98,7 +106,7 @@ def ask_ai(messages, model="gpt-3.5-turbo", max_tokens=800, temperature=0.7):
 
 @app.route('/')
 def home():
-    return render_template("index.html", cbc_explainer=CBC_SUMMARY[:600])
+    return render_template("index.html", cbc_explainer=CBC_SUMMARY[:600], firebase_config=FIREBASE_CONFIG)
 
 
 @app.route('/chat', methods=['POST'])
@@ -534,7 +542,7 @@ def ai_skill_analyzer():
 
 @app.route('/dashboard')
 def dashboard():
-    return render_template("dashboard.html", cbc_explainer=CBC_SUMMARY)
+    return render_template("dashboard.html", cbc_explainer=CBC_SUMMARY, firebase_config=FIREBASE_CONFIG)
 
 # ========== M-Pesa Payment Routes ==========
 

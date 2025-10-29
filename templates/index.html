@@ -4,6 +4,8 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>AI CareerMentor Kenya - Your CBC Journey Starts Here</title>
+  <!-- Tailwind CSS CDN - Development Only -->
+  <!-- For production, install Tailwind CSS as PostCSS plugin or use CLI -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
@@ -503,28 +505,24 @@
   <div id="auth-modal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center z-50 p-4">
     <div class="bg-white rounded-2xl p-8 w-full max-w-md shadow-2xl">
       <h2 id="auth-title" class="text-2xl font-bold text-center mb-6"></h2>
-      <div id="name-fields" class="space-y-4 hidden">
-        <input type="text" id="first-name" placeholder="First Name" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
-        <input type="text" id="second-name" placeholder="Last Name" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
-      </div>
-      <input type="email" id="auth-email" placeholder="Email" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent mb-4" />
-      <input type="password" id="auth-password" placeholder="Password" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent mb-4" />
-      <input type="password" id="confirm-password" placeholder="Confirm Password" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent mb-4 hidden" />
-      <button id="auth-action" class="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition duration-200 mb-4">Submit</button>
-      <button onclick="closeModal()" class="text-gray-500 text-sm block w-full text-center hover:text-gray-700 transition duration-200">Cancel</button>
+      <form id="auth-form" onsubmit="return false;">
+        <div id="name-fields" class="space-y-4 hidden">
+          <input type="text" id="first-name" placeholder="First Name" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+          <input type="text" id="second-name" placeholder="Last Name" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+        </div>
+        <input type="email" id="auth-email" placeholder="Email" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent mb-4" />
+        <input type="password" id="auth-password" placeholder="Password" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent mb-4" />
+        <input type="password" id="confirm-password" placeholder="Confirm Password" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent mb-4 hidden" />
+        <button id="auth-action" class="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition duration-200 mb-4">Submit</button>
+        <button onclick="closeModal()" class="text-gray-500 text-sm block w-full text-center hover:text-gray-700 transition duration-200">Cancel</button>
+      </form>
     </div>
   </div>
 
   <!-- Firebase Auth and AI CV Logic -->
   <script>
-    // Firebase Config - Load from environment variables
-    // NOTE: Replace these with your actual Firebase configuration
-    const firebaseConfig = {
-      apiKey: "YOUR_FIREBASE_API_KEY",
-      authDomain: "YOUR_AUTH_DOMAIN",
-      projectId: "YOUR_PROJECT_ID",
-      appId: "YOUR_APP_ID"
-    };
+    // Firebase Config - Loaded from Flask backend
+    const firebaseConfig = {{ firebase_config | tojson }};
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
     const db = firebase.firestore();
