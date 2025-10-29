@@ -517,12 +517,13 @@
 
   <!-- Firebase Auth and AI CV Logic -->
   <script>
-    // Firebase Config
+    // Firebase Config - Load from environment variables
+    // NOTE: Replace these with your actual Firebase configuration
     const firebaseConfig = {
-      apiKey: "AIzaSyDTm-ckLXcOcRM_4g5hTs94Tm4W_BUx-eI",
-      authDomain: "cbch-6178c.firebaseapp.com",
-      projectId: "cbch-6178c",
-      appId: "1:577618974847:web:730ae29830d14fc0a6c74a"
+      apiKey: "YOUR_FIREBASE_API_KEY",
+      authDomain: "YOUR_AUTH_DOMAIN",
+      projectId: "YOUR_PROJECT_ID",
+      appId: "YOUR_APP_ID"
     };
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
