@@ -44,8 +44,55 @@ app.secret_key = os.getenv('SECRET_KEY', 'your-secret-key-change-this')
 
 # Initialize Firebase Admin SDK
 if not firebase_admin._apps:
-    cred = credentials.Certificate("firebase_config.json")
-    firebase_admin.initialize_app(cred)
+    # Try to load from file first, then from environment variables
+    firebase_config_file = "firebase_config.json"
+    firebase_config_env = os.getenv('FIREBASE_CONFIG_JSON')
+    
+    if os.path.exists(firebase_config_file):
+        # Use file if it exists
+        cred = credentials.Certificate(firebase_config_file)
+        firebase_admin.initialize_app(cred)
+    elif firebase_config_env:
+        # Create file from environment variable
+        try:
+            firebase_config_data = json.loads(firebase_config_env)
+            with open(firebase_config_file, 'w') as f:
+                json.dump(firebase_config_data, f)
+            cred = credentials.Certificate(firebase_config_file)
+            firebase_admin.initialize_app(cred)
+        except json.JSONDecodeError:
+            raise ValueError("FIREBASE_CONFIG_JSON environment variable contains invalid JSON")
+    else:
+        # Try to construct from individual environment variables
+        firebase_project_id = os.getenv('FIREBASE_PROJECT_ID')
+        firebase_private_key = os.getenv('FIREBASE_PRIVATE_KEY', '').replace('\\n', '\n')
+        firebase_client_email = os.getenv('FIREBASE_CLIENT_EMAIL')
+        
+        if firebase_project_id and firebase_private_key and firebase_client_email:
+            firebase_config_dict = {
+                "type": "service_account",
+                "project_id": firebase_project_id,
+                "private_key_id": os.getenv('FIREBASE_PRIVATE_KEY_ID', ''),
+                "private_key": firebase_private_key,
+                "client_email": firebase_client_email,
+                "client_id": os.getenv('FIREBASE_CLIENT_ID', ''),
+                "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+                "token_uri": "https://oauth2.googleapis.com/token",
+                "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+                "client_x509_cert_url": os.getenv('FIREBASE_CLIENT_X509_CERT_URL', '')
+            }
+            with open(firebase_config_file, 'w') as f:
+                json.dump(firebase_config_dict, f)
+            cred = credentials.Certificate(firebase_config_file)
+            firebase_admin.initialize_app(cred)
+        else:
+            raise FileNotFoundError(
+                "firebase_config.json not found and FIREBASE_CONFIG_JSON or individual Firebase env vars not set. "
+                "Please either:\n"
+                "1. Add firebase_config.json file to your deployment, OR\n"
+                "2. Set FIREBASE_CONFIG_JSON environment variable with the full JSON content, OR\n"
+                "3. Set individual Firebase service account environment variables."
+            )
 
 db = firestore.client()
 
