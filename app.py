@@ -20,12 +20,20 @@ OPENAI_KEY = os.getenv("OPENAI_API_KEY")
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 
 # Firebase Configuration for frontend
+# Load from .env file - use setup_env.py to create .env with your Firebase credentials
 FIREBASE_CONFIG = {
-    'apiKey': os.getenv('FIREBASE_API_KEY', 'AIzaSyDTm-ckLXcOcRM_4g5hTs94Tm4W_BUx-eI'),
-    'authDomain': os.getenv('FIREBASE_AUTH_DOMAIN', 'cbch-6178c.firebaseapp.com'),
-    'projectId': os.getenv('FIREBASE_PROJECT_ID', 'cbch-6178c'),
-    'appId': os.getenv('FIREBASE_APP_ID', '1:577618974847:web:730ae29830d14fc0a6c74a')
+    'apiKey': os.getenv('FIREBASE_API_KEY'),
+    'authDomain': os.getenv('FIREBASE_AUTH_DOMAIN'),
+    'projectId': os.getenv('FIREBASE_PROJECT_ID'),
+    'appId': os.getenv('FIREBASE_APP_ID')
 }
+
+# Validate Firebase config
+if not all(FIREBASE_CONFIG.values()):
+    raise ValueError(
+        "Missing Firebase configuration in .env file. "
+        "Please run 'python setup_env.py' and add your Firebase credentials."
+    )
 
 # OpenAI Client
 openai_client = openai.OpenAI(api_key=OPENAI_KEY)
@@ -843,4 +851,8 @@ def get_pathway_downloads():
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    # For local development only
+    # In production, Elastic Beanstalk uses application.py
+    port = int(os.environ.get('PORT', 5000))
+    debug = os.getenv('FLASK_ENV') == 'development'
+    app.run(host='0.0.0.0', port=port, debug=debug)

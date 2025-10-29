@@ -1,0 +1,22 @@
+# Files to ignore when deploying to Elastic Beanstalk
+.env
+.env.local
+*.pyc
+__pycache__/
+*.log
+logs.txt
+.git/
+.gitignore
+README.md
+AWS_DEPLOYMENT_GUIDE.md
+ENVIRONMENT_SETUP.md
+MPESA_CONFIGURATION.md
+*.md
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+deploy_ec2.sh
+

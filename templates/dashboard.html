@@ -715,12 +715,36 @@
           userStats = {
             chatCount: userData.chatCount || 0,
             cvCount: userData.cvCount || 0,
-            pathwayCount: userData.pathwayCount || 0
+            pathwayCount: userData.pathwayCount || 0,
+            assessmentCount: userData.assessmentCount || 0,
+            interviewCount: userData.interviewCount || 0,
+            skillCount: userData.skillCount || 0
+          };
+          updateStatsDisplay();
+        } else {
+          // Initialize with zeros if document doesn't exist
+          userStats = {
+            chatCount: 0,
+            cvCount: 0,
+            pathwayCount: 0,
+            assessmentCount: 0,
+            interviewCount: 0,
+            skillCount: 0
           };
           updateStatsDisplay();
         }
       } catch (error) {
         console.error("Error loading user stats:", error);
+        // Initialize with zeros on error
+        userStats = {
+          chatCount: 0,
+          cvCount: 0,
+          pathwayCount: 0,
+          assessmentCount: 0,
+          interviewCount: 0,
+          skillCount: 0
+        };
+        updateStatsDisplay();
       }
     }
 
@@ -757,13 +781,45 @@
 
     async function updateUserStats(userId, statType) {
       try {
-        await db.collection("users").doc(userId).update({
-          [`${statType}Count`]: firebase.firestore.FieldValue.increment(1)
-        });
-        userStats[`${statType}Count`]++;
+        const userRef = db.collection("users").doc(userId);
+        const userDoc = await userRef.get();
+        
+        if (userDoc.exists) {
+          // Update existing document using increment
+          await userRef.update({
+            [`${statType}Count`]: firebase.firestore.FieldValue.increment(1)
+          });
+          // Update local stats immediately for better UX
+          userStats[`${statType}Count`] = (userStats[`${statType}Count`] || 0) + 1;
+        } else {
+          // Create new document with initial count
+          const user = firebase.auth().currentUser;
+          const initialCounts = {
+            chatCount: 0,
+            cvCount: 0,
+            pathwayCount: 0,
+            assessmentCount: 0,
+            interviewCount: 0,
+            skillCount: 0
+          };
+          initialCounts[`${statType}Count`] = 1;
+          
+          await userRef.set({
+            name: user.displayName || "",
+            email: user.email || "",
+            ...initialCounts,
+            timestamp: firebase.firestore.FieldValue.serverTimestamp()
+          });
+          // Initialize and update local stats
+          userStats = { ...userStats, ...initialCounts };
+        }
+        
+        // Update display immediately
         updateStatsDisplay();
       } catch (error) {
         console.error("Error updating user stats:", error);
+        // On error, try to reload stats from database
+        await loadUserStats(userId);
       }
     }
 

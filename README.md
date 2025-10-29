@@ -561,53 +561,138 @@ service cloud.firestore {
 pip install -r requirements.txt
 
 # Set up environment
-cp .env.example .env
+python setup_env.py
 # Edit .env with your keys
 
 # Run development server
 python app.py
 ```
 
-### **Production Deployment**
+### **💰 FREE Deployment Options** (Recommended!)
 
-#### **Option 1: Heroku**
-```bash
-# Install Heroku CLI
-# Create Procfile
-echo "web: python app.py" > Procfile
+#### **🥇 Option 1: Render.com (Easiest - FREE Forever!)**
+**Perfect for:** Quick deployment, zero configuration, free forever
 
-# Deploy
-git add .
-git commit -m "Deploy to Heroku"
-git push heroku main
-```
+- ✅ **FREE** - 750 hours/month forever
+- ✅ **5 minute setup** - Just connect GitHub
+- ✅ **Auto-deploy** from Git
+- ✅ **Free SSL** certificate
 
-#### **Option 2: DigitalOcean**
-```bash
-# Set up Ubuntu server
-# Install Python and dependencies
-# Configure nginx
-# Set up SSL certificate
-# Deploy application
-```
+**Quick Start:**
+1. Sign up at https://render.com (free, no credit card)
+2. Connect GitHub repository
+3. Create Web Service
+4. Add environment variables
+5. Deploy! 🎉
 
-#### **Option 3: AWS**
-```bash
-# Use Elastic Beanstalk
-# Configure environment
-# Deploy application
-# Set up RDS for database
-# Configure CloudFront for CDN
-```
+**📖 Full Guide:** See [`render_deploy.md`](render_deploy.md) for detailed steps
+
+**Your app will be at:** `https://your-app.onrender.com`
+
+---
+
+#### **🥈 Option 2: AWS EC2 Free Tier (Learn AWS)**
+**Perfect for:** Learning AWS, understanding cloud infrastructure
+
+- ✅ **FREE for first year** - 750 hours/month
+- ✅ **t2.micro instance** - Free tier eligible
+- ✅ **Full control** - Learn Linux/SSH/AWS
+
+**Quick Start:**
+1. Launch EC2 t2.micro instance
+2. Run: `./deploy_ec2.sh`
+3. Configure environment variables
+4. Start service
+
+**📖 Full Guide:** See [`FREE_TIER_DEPLOYMENT.md`](FREE_TIER_DEPLOYMENT.md) → AWS EC2 section
+
+**Cost:** FREE (first year), then ~$7-10/month
+
+---
+
+#### **🥉 Option 3: Railway.app (Modern)**
+**Perfect for:** Modern deployment platform
+
+- ✅ **$5 free credit/month**
+- ✅ **Easy GitHub integration**
+- ✅ **Auto SSL**
+
+**Quick Start:**
+1. Sign up at https://railway.app
+2. Deploy from GitHub
+3. Add environment variables
+4. Done!
+
+**📖 Full Guide:** See [`FREE_TIER_DEPLOYMENT.md`](FREE_TIER_DEPLOYMENT.md) → Railway section
+
+---
+
+### **💵 Paid Deployment Options** (For Production Scale)
+
+#### **Option 4: AWS Elastic Beanstalk**
+- Automatic scaling and load balancing
+- Built-in monitoring
+- **Cost:** ~$25-35/month
+
+**📖 Full Guide:** See [`AWS_DEPLOYMENT_GUIDE.md`](AWS_DEPLOYMENT_GUIDE.md) → Method 1
+
+#### **Option 5: AWS EC2**
+- Full control and customization
+- **Cost:** ~$7-15/month (after free tier)
+
+**📖 Full Guide:** See [`AWS_DEPLOYMENT_GUIDE.md`](AWS_DEPLOYMENT_GUIDE.md) → Method 2
+
+---
+
+### **📚 Deployment Documentation**
+
+- **[FREE_TIER_QUICK_START.md](FREE_TIER_QUICK_START.md)** - ⚡ Quick reference for free deployment
+- **[FREE_TIER_DEPLOYMENT.md](FREE_TIER_DEPLOYMENT.md)** - 📖 Complete free tier guide
+- **[render_deploy.md](render_deploy.md)** - 🎯 Step-by-step Render.com guide
+- **[AWS_DEPLOYMENT_GUIDE.md](AWS_DEPLOYMENT_GUIDE.md)** - 🚀 Comprehensive AWS guide
+- **[DEPLOYMENT_CHECKLIST.md](DEPLOYMENT_CHECKLIST.md)** - ✅ Pre-deployment checklist
+
+---
 
 ### **Environment Variables for Production**
+
+Set all these in your deployment platform:
+
 ```env
+# Firebase
+FIREBASE_API_KEY=your_firebase_api_key
+FIREBASE_AUTH_DOMAIN=your_project.firebaseapp.com
+FIREBASE_PROJECT_ID=your_project_id
+FIREBASE_APP_ID=your_app_id
+
+# AI Services
+OPENAI_API_KEY=your_openai_key
+GROQ_API_KEY=your_groq_key
+
+# App Configuration
+SECRET_KEY=your_strong_secret_key
+ADMIN_EMAIL=admin@careermentor.com
+ADMIN_PASSWORD=your_strong_password
 FLASK_ENV=production
-SECRET_KEY=your_production_secret_key
-OPENAI_API_KEY=your_production_openai_key
-FIREBASE_CONFIG=your_production_firebase_config
-MPESA_ENVIRONMENT=production
+
+# M-Pesa (if using)
+MPESA_CONSUMER_KEY=your_mpesa_key
+MPESA_CONSUMER_SECRET=your_mpesa_secret
+MPESA_BUSINESS_SHORTCODE=your_shortcode
+MPESA_PASSKEY=your_passkey
+MPESA_CALLBACK_URL=https://your-domain.com/mpesa/callback
+MPESA_ENVIRONMENT=sandbox
 ```
+
+**Plus:** Upload `firebase_config.json` to your server
+
+---
+
+### **🚀 Recommended: Start with FREE Tier!**
+
+**New to deployment?** → Try **Render.com** (5 minutes, free forever)  
+**Want to learn AWS?** → Try **AWS EC2 Free Tier** (free for first year)  
+**Need scaling?** → Upgrade to **Elastic Beanstalk** later
 
 ---
 

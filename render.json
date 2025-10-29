@@ -1,0 +1,49 @@
+{
+  "name": "CBC AI CareerMentor",
+  "env": "python",
+  "buildCommand": "pip install --upgrade pip && pip install -r requirements.txt",
+  "startCommand": "python -m gunicorn application:app --bind 0.0.0.0:$PORT --workers 2 --timeout 120",
+  "envVars": [
+    {
+      "key": "FIREBASE_API_KEY",
+      "value": "your_firebase_api_key_here",
+      "sync": false
+    },
+    {
+      "key": "FIREBASE_AUTH_DOMAIN",
+      "value": "your_project.firebaseapp.com",
+      "sync": false
+    },
+    {
+      "key": "FIREBASE_PROJECT_ID",
+      "value": "your_project_id",
+      "sync": false
+    },
+    {
+      "key": "FIREBASE_APP_ID",
+      "value": "your_app_id",
+      "sync": false
+    },
+    {
+      "key": "OPENAI_API_KEY",
+      "value": "your_openai_key",
+      "sync": false
+    },
+    {
+      "key": "GROQ_API_KEY",
+      "value": "your_groq_key",
+      "sync": false
+    },
+    {
+      "key": "SECRET_KEY",
+      "value": "your_secret_key_here",
+      "sync": false
+    },
+    {
+      "key": "FLASK_ENV",
+      "value": "production",
+      "sync": false
+    }
+  ]
+}
+
