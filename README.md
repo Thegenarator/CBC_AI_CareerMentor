@@ -220,7 +220,7 @@ ADMIN_PASSWORD=admin123
 # M-Pesa Configuration (Optional)
 MPESA_CONSUMER_KEY=your_mpesa_consumer_key
 MPESA_CONSUMER_SECRET=your_mpesa_consumer_secret
-MPESA_BUSINESS_SHORTCODE=your_business_shortcode
+MPESA_BUSINESS_SHORTCODE=174379
 MPESA_PASSKEY=your_mpesa_passkey
 MPESA_CALLBACK_URL=https://your-domain.com/mpesa/callback
 MPESA_ENVIRONMENT=sandbox
@@ -455,7 +455,7 @@ service cloud.firestore {
 1. **Sandbox Testing**:
    - Use test phone: `254708374149`
    - Test PIN: `0000`
-   - Business Shortcode: `your_test_shortcode`
+   - Business Shortcode: `174379`
 
 2. **Production Setup**:
    - Apply for production access

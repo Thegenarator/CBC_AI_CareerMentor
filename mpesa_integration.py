@@ -18,10 +18,10 @@ load_dotenv()
 class MpesaIntegration:
     def __init__(self):
         # M-Pesa API Configuration
-        # Using environment variables for security
-        self.consumer_key = os.getenv('MPESA_CONSUMER_KEY')
-        self.consumer_secret = os.getenv('MPESA_CONSUMER_SECRET')
-        self.business_shortcode = os.getenv('MPESA_BUSINESS_SHORTCODE')
+        # Using provided credentials from Safaricom Developer Portal
+        self.consumer_key = os.getenv('MPESA_CONSUMER_KEY', 'GnMdAhLo9w1oGUApZpWh9myVB0G35tTqchfkKAdhtmifCeoK')
+        self.consumer_secret = os.getenv('MPESA_CONSUMER_SECRET', 'Pr1n6TFKcMqj7iYkVfA7HnvQAnUeYO2MBcx8SbGScVyQAGDXOSADiInJ7gGdxtpD')
+        self.business_shortcode = os.getenv('MPESA_BUSINESS_SHORTCODE', '174379')
         self.passkey = os.getenv('MPESA_PASSKEY')
         self.callback_url = os.getenv('MPESA_CALLBACK_URL', 'https://your-domain.com/mpesa/callback')
         self.environment = os.getenv('MPESA_ENVIRONMENT', 'sandbox')  # sandbox or production
