@@ -227,3 +227,10 @@ SETUP_GUIDE.md
 MPESA_CONFIGURATION.md
 PREMIUM_FEATURES_COMPLETE.md
 PREMIUM_FEATURES_FIX.md
+
+# ===========================================
+# Configuration Templates
+# ===========================================
+firebase_config.json
+firebase_config_template.json
+*.config.json
