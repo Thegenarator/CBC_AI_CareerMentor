@@ -285,30 +285,39 @@ def generate_cv():
         text = line.strip()
         if not text:
             continue
+
+        safe_text = text.encode('latin-1', 'replace').decode('latin-1')
         pdf.set_x(pdf.l_margin)
         if text.endswith(":"):
             # Section header
             pdf.set_font("Arial", style="B", size=12)
-            pdf.multi_cell(usable_width, 8, text, 0, "L")
+            pdf.multi_cell(usable_width, 8, safe_text, 0, "L")
         elif ":" in text:
             # Key-value like Name: Jane Doe
             key, value = text.split(":", 1)
+            key_text = f"{key.strip()}: {value.strip()}"
+            safe_key_text = key_text.encode('latin-1', 'replace').decode('latin-1')
             pdf.set_font("Arial", style="B", size=12)
-            pdf.multi_cell(usable_width, 8, f"{key.strip()}: {value.strip()}", 0, "L")
+            pdf.multi_cell(usable_width, 8, safe_key_text, 0, "L")
         elif text.startswith("-"):
             # Bullet point
             pdf.set_font("Arial", style="", size=12)
             bullet_text = u"\u2022 " + text.lstrip("-").strip()
-            pdf.multi_cell(usable_width, 8, bullet_text, 0, "L")
+            safe_bullet = bullet_text.encode('latin-1', 'replace').decode('latin-1')
+            pdf.multi_cell(usable_width, 8, safe_bullet, 0, "L")
         else:
             # Regular paragraph
             pdf.set_font("Arial", style="", size=12)
-            pdf.multi_cell(usable_width, 8, text, 0, "L")
+            pdf.multi_cell(usable_width, 8, safe_text, 0, "L")
         pdf.ln(0.5)
 
     # Output to BytesIO
     pdf_output = io.BytesIO()
-    pdf_bytes = pdf.output(dest='S').encode('latin-1')
+    pdf_data = pdf.output(dest='S')
+    if isinstance(pdf_data, bytes):
+        pdf_bytes = pdf_data
+    else:
+        pdf_bytes = pdf_data.encode('latin-1', 'replace')
     pdf_output.write(pdf_bytes)
     pdf_output.seek(0)
 
