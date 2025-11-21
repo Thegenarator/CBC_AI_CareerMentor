@@ -279,27 +279,32 @@ def generate_cv():
 
     lines = reply.strip().split("\n")
     pdf.set_font("Arial", size=12)
+    usable_width = pdf.w - 2 * pdf.l_margin
 
     for line in lines:
-        if ":" in line and line.strip().endswith(":"):
-            # This is a section header
+        text = line.strip()
+        if not text:
+            continue
+        pdf.set_x(pdf.l_margin)
+        if text.endswith(":"):
+            # Section header
             pdf.set_font("Arial", style="B", size=12)
-            pdf.multi_cell(0, 10, line.strip())
-        elif ":" in line:
+            pdf.multi_cell(usable_width, 8, text, 0, "L")
+        elif ":" in text:
             # Key-value like Name: Jane Doe
-            key, value = line.split(":", 1)
+            key, value = text.split(":", 1)
             pdf.set_font("Arial", style="B", size=12)
-            pdf.cell(40, 10, f"{key.strip()}: ")
-            pdf.set_font("Arial", style="", size=12)
-            pdf.multi_cell(0, 10, value.strip())
-        elif line.strip().startswith("-"):
+            pdf.multi_cell(usable_width, 8, f"{key.strip()}: {value.strip()}", 0, "L")
+        elif text.startswith("-"):
             # Bullet point
             pdf.set_font("Arial", style="", size=12)
-            pdf.multi_cell(0, 10, u"\u2022 " + line.strip().lstrip("-").strip())
+            bullet_text = u"\u2022 " + text.lstrip("-").strip()
+            pdf.multi_cell(usable_width, 8, bullet_text, 0, "L")
         else:
             # Regular paragraph
             pdf.set_font("Arial", style="", size=12)
-            pdf.multi_cell(0, 10, line.strip())
+            pdf.multi_cell(usable_width, 8, text, 0, "L")
+        pdf.ln(0.5)
 
     # Output to BytesIO
     pdf_output = io.BytesIO()
@@ -414,15 +419,28 @@ Student's description: "{prompt}"
     pdf.add_page()
     pdf.set_auto_page_break(auto=True, margin=15)
     pdf.set_font("Arial", size=12)
+    usable_width = pdf.w - 2 * pdf.l_margin
 
     lines = reply.split("\n")
     for line in lines:
-        if line.strip().startswith("- ") or line.strip().endswith(":"):
+        text = line.strip()
+        if not text:
+            continue
+        pdf.set_x(pdf.l_margin)
+        if text.startswith("- ") or text.startswith("•") or text.startswith("•"):
+            pdf.set_font("Arial", size=12)
+            safe_line = (u"• " + text.lstrip("-• ").strip()).encode('latin-1', 'replace').decode('latin-1')
+            pdf.multi_cell(usable_width, 8, txt=safe_line, align="L")
+        elif text.endswith(":"):
             pdf.set_font("Arial", style="B", size=12)
+            safe_line = text.encode('latin-1', 'replace').decode('latin-1')
+            pdf.multi_cell(usable_width, 8, txt=safe_line, align="L")
+            pdf.set_font("Arial", size=12)
         else:
-            pdf.set_font("Arial", style="", size=12)
-        safe_line = line.encode('latin-1', 'replace').decode('latin-1')
-        pdf.multi_cell(0, 10, txt=safe_line)
+            pdf.set_font("Arial", size=12)
+            safe_line = text.encode('latin-1', 'replace').decode('latin-1')
+            pdf.multi_cell(usable_width, 8, txt=safe_line, align="L")
+        pdf.ln(0.5)
 
     pdf_output = io.BytesIO()
     pdf_bytes = pdf.output(dest='S').encode('latin-1')

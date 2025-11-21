@@ -90,9 +90,26 @@ FLASK_ENV = production
 
 ---
 
-## 🎯 Step 5: Upload Firebase Config
+## 🎯 Step 5: Add Firebase Config (Important!)
 
-**Option A: Via Shell (Recommended)**
+**Option A: Via Environment Variable (Easiest - Recommended) ✅**
+
+1. Open your local `firebase_config.json` file
+2. Copy the entire JSON content
+3. In Render Dashboard → Your Service → Environment tab
+4. Click "Add Environment Variable"
+5. **Key:** `FIREBASE_CONFIG_JSON`
+6. **Value:** Paste the entire JSON content (as one line)
+7. Click "Save Changes"
+
+**Example:**
+```
+FIREBASE_CONFIG_JSON={"type":"service_account","project_id":"cbch-6178c","private_key":"-----BEGIN PRIVATE KEY-----\n...","client_email":"firebase-adminsdk@..."}
+```
+
+The app will automatically create the file from this variable! ✅
+
+**Option B: Via Shell (Alternative)**
 
 1. Go to your service → **Shell** tab
 2. Run:
@@ -102,20 +119,7 @@ FLASK_ENV = production
 3. Paste your Firebase service account JSON
 4. Save: Ctrl+X, Y, Enter
 
-**Option B: Via Environment Variable**
-
-1. In Environment tab, add:
-   ```
-   FIREBASE_CONFIG = {"type":"service_account",...}
-   ```
-2. Update `app.py` to read from env if not file exists:
-   ```python
-   import json
-   firebase_config_env = os.getenv('FIREBASE_CONFIG')
-   if firebase_config_env:
-       with open("firebase_config.json", "w") as f:
-           json.dump(json.loads(firebase_config_env), f)
-   ```
+**📖 Detailed Instructions:** See [`RENDER_FIREBASE_CONFIG.md`](RENDER_FIREBASE_CONFIG.md)
 
 ---
 
