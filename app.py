@@ -435,24 +435,27 @@ Student's description: "{prompt}"
         text = line.strip()
         if not text:
             continue
+        safe_line = text.encode('latin-1', 'replace').decode('latin-1')
         pdf.set_x(pdf.l_margin)
-        if text.startswith("- ") or text.startswith("•") or text.startswith("•"):
+        if text.startswith(("- ", "•")):
             pdf.set_font("Arial", size=12)
-            safe_line = (u"• " + text.lstrip("-• ").strip()).encode('latin-1', 'replace').decode('latin-1')
-            pdf.multi_cell(usable_width, 8, txt=safe_line, align="L")
+            formatted = (u"• " + text.lstrip("-• ").strip()).encode('latin-1', 'replace').decode('latin-1')
+            pdf.multi_cell(usable_width, 8, txt=formatted, align="L")
         elif text.endswith(":"):
             pdf.set_font("Arial", style="B", size=12)
-            safe_line = text.encode('latin-1', 'replace').decode('latin-1')
             pdf.multi_cell(usable_width, 8, txt=safe_line, align="L")
             pdf.set_font("Arial", size=12)
         else:
             pdf.set_font("Arial", size=12)
-            safe_line = text.encode('latin-1', 'replace').decode('latin-1')
             pdf.multi_cell(usable_width, 8, txt=safe_line, align="L")
         pdf.ln(0.5)
 
     pdf_output = io.BytesIO()
-    pdf_bytes = pdf.output(dest='S').encode('latin-1')
+    pdf_data = pdf.output(dest='S')
+    if isinstance(pdf_data, (bytes, bytearray)):
+        pdf_bytes = bytes(pdf_data)
+    else:
+        pdf_bytes = pdf_data.encode('latin-1', 'replace')
     pdf_output.write(pdf_bytes)
     pdf_output.seek(0)
 
