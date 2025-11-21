@@ -314,8 +314,8 @@ def generate_cv():
     # Output to BytesIO
     pdf_output = io.BytesIO()
     pdf_data = pdf.output(dest='S')
-    if isinstance(pdf_data, bytes):
-        pdf_bytes = pdf_data
+    if isinstance(pdf_data, (bytes, bytearray)):
+        pdf_bytes = bytes(pdf_data)
     else:
         pdf_bytes = pdf_data.encode('latin-1', 'replace')
     pdf_output.write(pdf_bytes)
